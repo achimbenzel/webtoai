@@ -16,10 +16,10 @@
  * `#include`, so the file that ships is exactly the file we linted, and no
  * path resolution happens at runtime.
  */
-import { spawnSync } from "node:child_process";
 import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { build } from "vite";
 
 const appDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const repoRoot = dirname(dirname(appDir));
@@ -87,27 +87,31 @@ function copyStaticFiles() {
   log("copied CSXS/manifest.xml and config/");
 }
 
-function buildClient() {
-  const viteBin = join(repoRoot, "node_modules", ".bin", "vite");
-  const args = ["build", "--config", join(appDir, "vite.config.ts")];
-  if (watch) args.push("--watch");
-  const result = spawnSync(viteBin, args, { stdio: "inherit", cwd: appDir });
-  if (result.status !== 0) {
-    throw new Error(`vite build failed with exit code ${result.status}`);
-  }
+/**
+ * Vite is invoked through its JavaScript API rather than as a subprocess.
+ * Spawning `node_modules/.bin/vite` fails on Windows, where that path is an
+ * extensionless shell script and only `vite.CMD` is executable — the spawn
+ * never starts and reports a null exit code. The API has no such asymmetry,
+ * and it surfaces real build errors as exceptions with a usable stack.
+ */
+async function buildClient() {
+  await build({
+    configFile: join(appDir, "vite.config.ts"),
+    build: watch ? { watch: {} } : {},
+  });
 }
 
-function main() {
+async function main() {
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
 
   copyStaticFiles();
   buildHostBundle();
   buildDebugFile();
-  buildClient();
+  await buildClient();
 
   log(`extension assembled at ${distDir}`);
   log("run `pnpm dev:install` to symlink it into the CEP extensions folder");
 }
 
-main();
+await main();

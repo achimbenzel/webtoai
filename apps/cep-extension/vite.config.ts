@@ -1,9 +1,10 @@
 import { defineConfig, type Plugin } from "vite";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 const here = fileURLToPath(new URL(".", import.meta.url));
-const pkg = JSON.parse(readFileSync(`${here}package.json`, "utf8")) as { version: string };
+const pkg = JSON.parse(readFileSync(join(here, "package.json"), "utf8")) as { version: string };
 
 /**
  * CEP panels are loaded from a `file://` URL. Chromium refuses to fetch ES

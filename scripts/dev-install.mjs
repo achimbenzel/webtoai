@@ -105,7 +105,9 @@ function setPlayerDebugMode(enabled) {
       command = "defaults";
       commandArgs = ["write", `com.adobe.CSXS.${version}`, "PlayerDebugMode", value];
     } else if (os === "win32") {
-      command = "reg";
+      // Spelled out with the extension: Node's spawn does not apply PATHEXT
+      // the way a shell does, so a bare "reg" is not guaranteed to resolve.
+      command = "reg.exe";
       commandArgs = [
         "add",
         `HKCU\\Software\\Adobe\\CSXS.${version}`,
@@ -128,7 +130,11 @@ function setPlayerDebugMode(enabled) {
     }
 
     const result = spawnSync(command, commandArgs, { stdio: "inherit" });
-    if (result.status === 0) {
+    if (result.error !== undefined) {
+      // A null status means the process never started at all — say which
+      // command could not be run rather than reporting "exit null".
+      fail(`could not run \`${command}\`: ${result.error.message}`);
+    } else if (result.status === 0) {
       log(`PlayerDebugMode=${value} for CSXS.${version}`);
     } else {
       fail(`failed to set PlayerDebugMode for CSXS.${version} (exit ${result.status})`);
