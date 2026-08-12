@@ -51,7 +51,33 @@ Then restart Illustrator and open **Window ▸ Extensions ▸ web2ai**. Remote
 debugging is available at <http://localhost:8088> while the panel is open.
 
 `pnpm dev:install --uninstall` removes the link. `--copy` installs a copy
-instead of a symlink; `--csxs=11,12` targets other CEP runtimes.
+instead of a symlink; `--csxs=11,12,13` targets other CEP runtimes.
+
+#### The panel does not appear under Window ▸ Extensions
+
+CEP fails silently — it never reports why it dropped an extension. Run the
+diagnostic, which walks the whole chain and names the first thing that is
+wrong:
+
+```bash
+pnpm dev:doctor
+```
+
+The three usual causes, in order of how often they bite:
+
+1. **An incomplete build.** If `MainPath` or `ScriptPath` does not resolve, CEP
+   skips the extension without a word. A build that failed partway through
+   leaves a folder that looks perfectly normal. `pnpm dev:install` now refuses
+   to install one, and the doctor points straight at the missing file.
+2. **PlayerDebugMode is off for the runtime Illustrator actually uses.** It is
+   per CSXS version: newer releases run on CSXS 12 and read a different
+   registry key than CSXS 11. `pnpm dev:install` sets both; use `--csxs` if
+   your version needs another.
+3. **The symlink.** On Windows, CEP's scanner does not reliably follow reparse
+   points. `pnpm dev:install --copy` installs a real folder — at the cost of
+   having to reinstall after each rebuild.
+
+Illustrator only scans at startup, so quit it completely between attempts.
 
 ### Chrome extension
 

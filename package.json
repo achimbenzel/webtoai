@@ -20,6 +20,7 @@
     "format:check": "prettier --check .",
     "dev:install": "node scripts/dev-install.mjs",
     "dev:uninstall": "node scripts/dev-install.mjs --uninstall",
+    "dev:doctor": "node scripts/dev-doctor.mjs",
     "fixtures": "node scripts/capture-fixtures.mjs",
     "fixtures:check": "node scripts/capture-fixtures.mjs --check",
     "schema:emit": "node --experimental-strip-types packages/schema/src/emit-json-schema.ts"
