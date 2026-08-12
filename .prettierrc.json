@@ -1,0 +1,17 @@
+{
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "arrowParens": "always",
+  "overrides": [
+    {
+      "comment": "ExtendScript is ES3: a trailing comma in an object or array literal is a syntax error there, and one syntax error kills the entire host bundle. apps/cep-extension/tests/host-es3.test.ts enforces this independently.",
+      "files": "apps/cep-extension/host/**/*.jsx",
+      "options": {
+        "parser": "babel",
+        "trailingComma": "none"
+      }
+    }
+  ]
+}

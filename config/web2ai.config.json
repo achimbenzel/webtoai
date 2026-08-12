@@ -1,0 +1,36 @@
+{
+  "$comment": "Single source of truth for all web2ai configuration. Read by the Chrome extension, the CEP Node server, the panel and the ExtendScript host. Do not hardcode any of these values elsewhere.",
+  "transport": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "portFallbackRange": 10,
+    "healthTimeoutMs": 1500,
+    "maxPayloadBytes": 268435456,
+    "allowedOrigins": ["chrome-extension://*"]
+  },
+  "capture": {
+    "fullPage": true,
+    "rootSelector": "",
+    "textAsOutlines": false,
+    "embedImages": true,
+    "maxDepth": 32,
+    "minNodeArea": 1,
+    "skipSelectors": ["script", "style", "noscript", "template", "link", "meta", "title", "head"],
+    "capturePseudoElements": true,
+    "captureCanvas": true,
+    "assetTimeoutMs": 10000,
+    "maxAssetBytes": 16777216
+  },
+  "render": {
+    "maxLayerDepth": 4,
+    "pointsPerCssPixel": 1,
+    "defaultFontFallback": "MyriadPro-Regular",
+    "multiShadowStrategy": "first-as-effect-rest-unsupported",
+    "embedPlacedImages": true,
+    "progressBatchSize": 50
+  },
+  "debug": {
+    "cepRemoteDebugPort": 8088,
+    "logLevel": "info"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+pnpm-lock.yaml
+apps/cep-extension/host/lib/json2.js
+fixtures/**/expected-scene.json
+packages/schema/dist/

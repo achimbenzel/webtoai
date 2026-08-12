@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@web2ai/schema": ["./packages/schema/src/index.ts"],
+      "@web2ai/schema/config": ["./packages/schema/src/config.ts"]
+    }
+  },
+  "include": ["vitest.config.ts", "eslint.config.js", "tests/**/*.ts"]
+}

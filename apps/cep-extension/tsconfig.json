@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // CEP with --mixed-context genuinely exposes both the DOM and Node globals
+    // in the same JS context, so both lib sets belong here.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"]
+  },
+  "include": ["client/src/**/*.ts", "node/src/**/*.ts", "vite.config.ts"]
+}

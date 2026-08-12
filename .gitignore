@@ -1,0 +1,27 @@
+node_modules/
+dist/
+build/
+out/
+*.tsbuildinfo
+.DS_Store
+coverage/
+
+# Build artifacts
+*.zxp
+*.crx
+*.pem
+release/
+
+# Signing material must never be committed
+certs/
+*.p12
+
+# Local runtime state
+apps/cep-extension/node/.runtime.json
+.web2ai-tmp/
+*.web2ai.json
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json

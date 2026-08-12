@@ -1,0 +1,59 @@
+{
+  "$comment": "Maps CSS font families (lowercased) + weight/style to Illustrator textFont names. Illustrator resolves fonts by PostScript-ish 'name' (app.textFonts[i].name). Unlisted families fall back to the family-name lookup in host/builder/fonts.jsx and, failing that, to render.defaultFontFallback from web2ai.config.json. Every fallback is reported, never silent.",
+  "families": {
+    "arial": {
+      "400|normal": "ArialMT",
+      "400|italic": "Arial-ItalicMT",
+      "700|normal": "Arial-BoldMT",
+      "700|italic": "Arial-BoldItalicMT"
+    },
+    "helvetica": {
+      "400|normal": "Helvetica",
+      "400|italic": "Helvetica-Oblique",
+      "700|normal": "Helvetica-Bold",
+      "700|italic": "Helvetica-BoldOblique"
+    },
+    "helvetica neue": {
+      "400|normal": "HelveticaNeue",
+      "700|normal": "HelveticaNeue-Bold"
+    },
+    "times new roman": {
+      "400|normal": "TimesNewRomanPSMT",
+      "400|italic": "TimesNewRomanPS-ItalicMT",
+      "700|normal": "TimesNewRomanPS-BoldMT",
+      "700|italic": "TimesNewRomanPS-BoldItalicMT"
+    },
+    "georgia": {
+      "400|normal": "Georgia",
+      "700|normal": "Georgia-Bold"
+    },
+    "courier new": {
+      "400|normal": "CourierNewPSMT",
+      "700|normal": "CourierNewPS-BoldMT"
+    },
+    "verdana": {
+      "400|normal": "Verdana",
+      "700|normal": "Verdana-Bold"
+    },
+    "inter": {
+      "400|normal": "Inter-Regular",
+      "500|normal": "Inter-Medium",
+      "600|normal": "Inter-SemiBold",
+      "700|normal": "Inter-Bold"
+    },
+    "roboto": {
+      "400|normal": "Roboto-Regular",
+      "500|normal": "Roboto-Medium",
+      "700|normal": "Roboto-Bold"
+    }
+  },
+  "genericFamilies": {
+    "serif": "TimesNewRomanPSMT",
+    "sans-serif": "ArialMT",
+    "monospace": "CourierNewPSMT",
+    "cursive": "ArialMT",
+    "fantasy": "ArialMT",
+    "system-ui": "ArialMT",
+    "-apple-system": "Helvetica"
+  }
+}

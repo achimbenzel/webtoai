@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  web2ai CEP panel manifest.
+
+  CEP 11 targets Illustrator CC 2021 (25.0) and newer. UXP is *not* publicly
+  available for Illustrator, so this extension deliberately uses the CEP 11 +
+  ExtendScript stack; see docs/ARCHITECTURE.md.
+
+  The two CEFCommandLine parameters are load-bearing:
+    --enable-nodejs   turns on the Node.js runtime inside the panel, which the
+                      transport server in node/ needs.
+    --mixed-context   runs Node and the browser context in one JS context so
+                      the panel UI can call require() directly.
+-->
+<ExtensionManifest
+  Version="11.0"
+  ExtensionBundleId="com.web2ai.cep"
+  ExtensionBundleVersion="0.1.0"
+  ExtensionBundleName="web2ai"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <ExtensionList>
+    <Extension Id="com.web2ai.cep.panel" Version="0.1.0" />
+  </ExtensionList>
+
+  <ExecutionEnvironment>
+    <HostList>
+      <!-- ILST = Illustrator. 25.0 is CC 2021, the first release on CEP 11. -->
+      <Host Name="ILST" Version="[25.0,99.9]" />
+    </HostList>
+    <LocaleList>
+      <Locale Code="All" />
+    </LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="11.0" />
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+
+  <DispatchInfoList>
+    <Extension Id="com.web2ai.cep.panel">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./client/index.html</MainPath>
+          <ScriptPath>./host/index.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+            <Parameter>--allow-file-access</Parameter>
+            <Parameter>--allow-file-access-from-files</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>web2ai</Menu>
+          <Geometry>
+            <Size>
+              <Height>560</Height>
+              <Width>380</Width>
+            </Size>
+            <MinSize>
+              <Height>320</Height>
+              <Width>300</Width>
+            </MinSize>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>
