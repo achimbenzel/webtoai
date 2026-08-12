@@ -1,0 +1,1655 @@
+{
+  "version": 1,
+  "source": {
+    "url": "fixture://landing-page/index.html",
+    "title": "web2ai fixture — landing page",
+    "capturedAt": "2026-01-01T00:00:00.000Z",
+    "viewport": {
+      "w": 1280,
+      "h": 800,
+      "dpr": 1
+    },
+    "document": {
+      "w": 1280,
+      "h": 1032
+    }
+  },
+  "options": {
+    "fullPage": true,
+    "rootSelector": "",
+    "textAsOutlines": false,
+    "embedImages": false,
+    "maxDepth": 32,
+    "minNodeArea": 1,
+    "skipSelectors": [
+      "script",
+      "style",
+      "noscript",
+      "template",
+      "link",
+      "meta",
+      "title",
+      "head"
+    ],
+    "capturePseudoElements": true,
+    "captureCanvas": true
+  },
+  "fonts": [
+    {
+      "family": "Arial",
+      "weight": 700,
+      "style": "normal",
+      "isWebFont": false,
+      "stack": "Arial, sans-serif"
+    },
+    {
+      "family": "Arial",
+      "weight": 400,
+      "style": "normal",
+      "isWebFont": false,
+      "stack": "Arial, sans-serif"
+    },
+    {
+      "family": "Arial",
+      "weight": 400,
+      "style": "italic",
+      "isWebFont": false,
+      "stack": "Arial, sans-serif"
+    }
+  ],
+  "assets": [
+    {
+      "id": "a52d79c4e",
+      "kind": "svg",
+      "mime": "image/svg+xml",
+      "width": 40,
+      "height": 40,
+      "svg": "<svg class=\"card__icon\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\">\n          <rect x=\"2\" y=\"2\" width=\"36\" height=\"36\" rx=\"8\" fill=\"#2f6fdd\"/>\n          <path d=\"M12 20l6 6 10-12\" stroke=\"#ffffff\" stroke-width=\"3\" fill=\"none\"/>\n        </svg>"
+    },
+    {
+      "id": "a8a9ec2f8",
+      "kind": "svg",
+      "mime": "image/svg+xml",
+      "width": 40,
+      "height": 40,
+      "svg": "<svg class=\"card__icon\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\">\n          <circle cx=\"20\" cy=\"20\" r=\"17\" fill=\"#45b2e8\"/>\n        </svg>"
+    },
+    {
+      "id": "aec9accf7",
+      "kind": "svg",
+      "mime": "image/svg+xml",
+      "width": 40,
+      "height": 40,
+      "svg": "<svg class=\"card__icon\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\">\n          <polygon points=\"20,3 37,36 3,36\" fill=\"#ffb703\"/>\n        </svg>"
+    },
+    {
+      "id": "a2b7324c0",
+      "kind": "raster",
+      "mime": "application/octet-stream",
+      "width": 480,
+      "height": 240,
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0ODAiIGhlaWdodD0iMjQwIj48cmVjdCB3aWR0aD0iNDgwIiBoZWlnaHQ9IjI0MCIgZmlsbD0iIzFmM2I3MyIvPjxjaXJjbGUgY3g9IjM2MCIgY3k9IjcwIiByPSI2MCIgZmlsbD0iI2ZmYjcwMyIvPjwvc3ZnPg=="
+    }
+  ],
+  "root": {
+    "id": "n386a6491",
+    "name": "body",
+    "role": "box",
+    "frame": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 1032
+    },
+    "paint": {
+      "radius": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "opacity": 1,
+      "fill": {
+        "kind": "solid",
+        "color": {
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 1
+        }
+      }
+    },
+    "clip": false,
+    "stackingOrder": 0,
+    "children": [
+      {
+        "id": "naa285d47",
+        "name": "section#features.cards",
+        "role": "box",
+        "frame": {
+          "x": 0,
+          "y": 417,
+          "w": 1280,
+          "h": 299
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 246,
+              "g": 248,
+              "b": 251,
+              "a": 1
+            }
+          }
+        },
+        "clip": false,
+        "stackingOrder": 1,
+        "children": [
+          {
+            "id": "n80d80e6c",
+            "name": "article.card.card--featured",
+            "role": "box",
+            "frame": {
+              "x": 32,
+              "y": 473,
+              "w": 392,
+              "h": 187
+            },
+            "paint": {
+              "radius": [
+                12,
+                12,
+                12,
+                12
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 255,
+                  "g": 255,
+                  "b": 255,
+                  "a": 1
+                }
+              },
+              "stroke": {
+                "widths": [
+                  4,
+                  1,
+                  1,
+                  1
+                ],
+                "color": {
+                  "r": 47,
+                  "g": 111,
+                  "b": 221,
+                  "a": 1
+                },
+                "style": "solid",
+                "colors": [
+                  {
+                    "r": 47,
+                    "g": 111,
+                    "b": 221,
+                    "a": 1
+                  },
+                  {
+                    "r": 227,
+                    "g": 232,
+                    "b": 239,
+                    "a": 1
+                  },
+                  {
+                    "r": 227,
+                    "g": 232,
+                    "b": 239,
+                    "a": 1
+                  },
+                  {
+                    "r": 227,
+                    "g": 232,
+                    "b": 239,
+                    "a": 1
+                  }
+                ]
+              },
+              "shadows": [
+                {
+                  "inset": false,
+                  "offsetX": 0,
+                  "offsetY": 6,
+                  "blur": 16,
+                  "spread": -4,
+                  "color": {
+                    "r": 16,
+                    "g": 32,
+                    "b": 46,
+                    "a": 0.08
+                  }
+                }
+              ]
+            },
+            "clip": false,
+            "stackingOrder": 8,
+            "children": [
+              {
+                "id": "nf9bed4a0",
+                "name": "h2.card__title",
+                "role": "text",
+                "frame": {
+                  "x": 57,
+                  "y": 559,
+                  "w": 342,
+                  "h": 24
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 9,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Real layers",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 700,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 17,
+                      "color": {
+                        "r": 22,
+                        "g": 32,
+                        "b": 46,
+                        "a": 1
+                      },
+                      "lineHeight": 24,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "n5565fe6f",
+                "name": "p.card__body",
+                "role": "text",
+                "frame": {
+                  "x": 57,
+                  "y": 591,
+                  "w": 342,
+                  "h": 44
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 10,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "The layer palette mirrors the DOM, with ",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 71,
+                        "g": 83,
+                        "b": 107,
+                        "a": 1
+                      },
+                      "lineHeight": 22,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    },
+                    {
+                      "chars": "readable",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "italic",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 22,
+                        "g": 32,
+                        "b": 46,
+                        "a": 1
+                      },
+                      "lineHeight": 22,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    },
+                    {
+                      "chars": " names.",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 71,
+                        "g": 83,
+                        "b": 107,
+                        "a": 1
+                      },
+                      "lineHeight": 22,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": false
+                },
+                "unsupportedReasons": [
+                  "text-multiple-runs"
+                ]
+              },
+              {
+                "id": "nff766c9f",
+                "name": "svg.card__icon",
+                "role": "svg",
+                "frame": {
+                  "x": 57,
+                  "y": 501,
+                  "w": 40,
+                  "h": 40
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": true,
+                "stackingOrder": 11,
+                "children": [],
+                "assetId": "a52d79c4e"
+              },
+              {
+                "id": "n773fff7c",
+                "name": "span.card__badge",
+                "role": "text",
+                "frame": {
+                  "x": 364.375,
+                  "y": 467,
+                  "w": 42.625,
+                  "h": 18
+                },
+                "paint": {
+                  "radius": [
+                    9,
+                    9,
+                    9,
+                    9
+                  ],
+                  "opacity": 1,
+                  "fill": {
+                    "kind": "solid",
+                    "color": {
+                      "r": 217,
+                      "g": 48,
+                      "b": 37,
+                      "a": 1
+                    }
+                  }
+                },
+                "clip": false,
+                "stackingOrder": 24,
+                "children": [],
+                "cssPosition": "absolute",
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "New",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 700,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 11,
+                      "color": {
+                        "r": 255,
+                        "g": 255,
+                        "b": 255,
+                        "a": 1
+                      },
+                      "lineHeight": 13.2,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                },
+                "unsupportedReasons": [
+                  "radius-scaled-to-fit"
+                ]
+              }
+            ],
+            "cssPosition": "relative",
+            "unsupportedReasons": [
+              "border-widths-differ"
+            ]
+          },
+          {
+            "id": "n932c8fbb",
+            "name": "article.card",
+            "role": "box",
+            "frame": {
+              "x": 444,
+              "y": 473,
+              "w": 392,
+              "h": 187
+            },
+            "paint": {
+              "radius": [
+                12,
+                12,
+                12,
+                12
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 255,
+                  "g": 255,
+                  "b": 255,
+                  "a": 1
+                }
+              },
+              "stroke": {
+                "widths": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "color": {
+                  "r": 227,
+                  "g": 232,
+                  "b": 239,
+                  "a": 1
+                },
+                "style": "solid"
+              },
+              "shadows": [
+                {
+                  "inset": false,
+                  "offsetX": 0,
+                  "offsetY": 6,
+                  "blur": 16,
+                  "spread": -4,
+                  "color": {
+                    "r": 16,
+                    "g": 32,
+                    "b": 46,
+                    "a": 0.08
+                  }
+                }
+              ]
+            },
+            "clip": false,
+            "stackingOrder": 12,
+            "children": [
+              {
+                "id": "nf979b766",
+                "name": "h2.card__title",
+                "role": "text",
+                "frame": {
+                  "x": 469,
+                  "y": 556,
+                  "w": 342,
+                  "h": 24
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 13,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Resolved paint order",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 700,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 17,
+                      "color": {
+                        "r": 22,
+                        "g": 32,
+                        "b": 46,
+                        "a": 1
+                      },
+                      "lineHeight": 24,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "n0d117597",
+                "name": "p.card__body",
+                "role": "text",
+                "frame": {
+                  "x": 469,
+                  "y": 588,
+                  "w": 342,
+                  "h": 22
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 14,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Stacking contexts, not document order.",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 71,
+                        "g": 83,
+                        "b": 107,
+                        "a": 1
+                      },
+                      "lineHeight": 22,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "n022f5e47",
+                "name": "svg.card__icon",
+                "role": "svg",
+                "frame": {
+                  "x": 469,
+                  "y": 498,
+                  "w": 40,
+                  "h": 40
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": true,
+                "stackingOrder": 15,
+                "children": [],
+                "assetId": "a8a9ec2f8"
+              }
+            ],
+            "cssPosition": "relative"
+          },
+          {
+            "id": "n5334c25e",
+            "name": "article.card (2)",
+            "role": "box",
+            "frame": {
+              "x": 856,
+              "y": 473,
+              "w": 392,
+              "h": 187
+            },
+            "paint": {
+              "radius": [
+                12,
+                12,
+                12,
+                12
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 255,
+                  "g": 255,
+                  "b": 255,
+                  "a": 1
+                }
+              },
+              "stroke": {
+                "widths": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "color": {
+                  "r": 227,
+                  "g": 232,
+                  "b": 239,
+                  "a": 1
+                },
+                "style": "solid"
+              },
+              "shadows": [
+                {
+                  "inset": false,
+                  "offsetX": 0,
+                  "offsetY": 6,
+                  "blur": 16,
+                  "spread": -4,
+                  "color": {
+                    "r": 16,
+                    "g": 32,
+                    "b": 46,
+                    "a": 0.08
+                  }
+                }
+              ]
+            },
+            "clip": false,
+            "stackingOrder": 16,
+            "children": [
+              {
+                "id": "n262d09c1",
+                "name": "h2.card__title",
+                "role": "text",
+                "frame": {
+                  "x": 881,
+                  "y": 556,
+                  "w": 342,
+                  "h": 24
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 17,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Honest reporting",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 700,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 17,
+                      "color": {
+                        "r": 22,
+                        "g": 32,
+                        "b": 46,
+                        "a": 1
+                      },
+                      "lineHeight": 24,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "n431fdc52",
+                "name": "p.card__body",
+                "role": "text",
+                "frame": {
+                  "x": 881,
+                  "y": 588,
+                  "w": 342,
+                  "h": 22
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 18,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Anything it cannot do, it names.",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 71,
+                        "g": 83,
+                        "b": 107,
+                        "a": 1
+                      },
+                      "lineHeight": 22,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "n9311f1de",
+                "name": "svg.card__icon",
+                "role": "svg",
+                "frame": {
+                  "x": 881,
+                  "y": 498,
+                  "w": 40,
+                  "h": 40
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": true,
+                "stackingOrder": 19,
+                "children": [],
+                "assetId": "aec9accf7"
+              }
+            ],
+            "cssPosition": "relative"
+          }
+        ]
+      },
+      {
+        "id": "nbdc959bf",
+        "name": "figure.figure",
+        "role": "box",
+        "frame": {
+          "x": 40,
+          "y": 732,
+          "w": 1200,
+          "h": 200
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 246,
+              "g": 248,
+              "b": 251,
+              "a": 1
+            }
+          }
+        },
+        "clip": false,
+        "stackingOrder": 2,
+        "children": [
+          {
+            "id": "nec798fbe",
+            "name": "img.figure__image",
+            "role": "image",
+            "frame": {
+              "x": 72,
+              "y": 732,
+              "w": 240,
+              "h": 120
+            },
+            "paint": {
+              "radius": [
+                8,
+                8,
+                8,
+                8
+              ],
+              "opacity": 1
+            },
+            "clip": true,
+            "stackingOrder": 3,
+            "children": [],
+            "assetId": "a2b7324c0"
+          },
+          {
+            "id": "n48a18c3e",
+            "name": "figcaption.figure__caption",
+            "role": "text",
+            "frame": {
+              "x": 72,
+              "y": 862,
+              "w": 1136,
+              "h": 14
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1
+            },
+            "clip": false,
+            "stackingOrder": 4,
+            "children": [],
+            "text": {
+              "runs": [
+                {
+                  "chars": "Embedded raster, no network required.",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 12,
+                  "color": {
+                    "r": 107,
+                    "g": 118,
+                    "b": 136,
+                    "a": 1
+                  },
+                  "lineHeight": 14.4,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "n7ade87c3",
+        "name": "footer.footer",
+        "role": "text",
+        "frame": {
+          "x": 0,
+          "y": 948,
+          "w": 1280,
+          "h": 84
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 22,
+              "g": 32,
+              "b": 46,
+              "a": 1
+            }
+          }
+        },
+        "clip": false,
+        "stackingOrder": 5,
+        "children": [],
+        "text": {
+          "runs": [
+            {
+              "chars": "— ",
+              "font": {
+                "family": "Arial",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Arial, sans-serif"
+              },
+              "size": 13,
+              "color": {
+                "r": 69,
+                "g": 178,
+                "b": 232,
+                "a": 1
+              },
+              "lineHeight": 20,
+              "letterSpacing": 0,
+              "align": "start"
+            },
+            {
+              "chars": "Northwind Ltd. All rights reserved.",
+              "font": {
+                "family": "Arial",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Arial, sans-serif"
+              },
+              "size": 13,
+              "color": {
+                "r": 170,
+                "g": 180,
+                "b": 196,
+                "a": 1
+              },
+              "lineHeight": 20,
+              "letterSpacing": 0,
+              "align": "start"
+            }
+          ],
+          "isSingleLine": false
+        },
+        "unsupportedReasons": [
+          "pseudo-element-merged-into-text"
+        ]
+      },
+      {
+        "id": "ne569e3d2",
+        "name": "section.hero",
+        "role": "box",
+        "frame": {
+          "x": 0,
+          "y": 64,
+          "w": 1280,
+          "h": 353
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "linear-gradient",
+            "angle": 135,
+            "stops": [
+              {
+                "color": {
+                  "r": 31,
+                  "g": 59,
+                  "b": 115,
+                  "a": 1
+                },
+                "offset": 0
+              },
+              {
+                "color": {
+                  "r": 47,
+                  "g": 111,
+                  "b": 221,
+                  "a": 1
+                },
+                "offset": 0.55
+              },
+              {
+                "color": {
+                  "r": 69,
+                  "g": 178,
+                  "b": 232,
+                  "a": 1
+                },
+                "offset": 1
+              }
+            ]
+          }
+        },
+        "clip": true,
+        "stackingOrder": 6,
+        "children": [
+          {
+            "id": "nb92a234c",
+            "name": "div.hero__blob",
+            "role": "box",
+            "frame": {
+              "x": 1020,
+              "y": -16,
+              "w": 320,
+              "h": 320
+            },
+            "paint": {
+              "radius": [
+                160,
+                160,
+                160,
+                160
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "radial-gradient",
+                "shape": "circle",
+                "center": {
+                  "x": 0.3,
+                  "y": 0.3
+                },
+                "radius": {
+                  "x": 0.9899,
+                  "y": 0.9899
+                },
+                "stops": [
+                  {
+                    "color": {
+                      "r": 255,
+                      "g": 255,
+                      "b": 255,
+                      "a": 0.35
+                    },
+                    "offset": 0
+                  },
+                  {
+                    "color": {
+                      "r": 255,
+                      "g": 255,
+                      "b": 255,
+                      "a": 0
+                    },
+                    "offset": 1
+                  }
+                ]
+              }
+            },
+            "clip": false,
+            "stackingOrder": 7,
+            "children": [],
+            "cssPosition": "absolute"
+          },
+          {
+            "id": "nf34f10b7",
+            "name": "div.hero__inner",
+            "role": "box",
+            "frame": {
+              "x": 32,
+              "y": 136,
+              "w": 640,
+              "h": 193
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1
+            },
+            "clip": false,
+            "stackingOrder": 20,
+            "children": [
+              {
+                "id": "n2f74fc85",
+                "name": "h1.hero__title",
+                "role": "text",
+                "frame": {
+                  "x": 32,
+                  "y": 136,
+                  "w": 640,
+                  "h": 52
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 21,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Ship the interface you designed",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 700,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 44,
+                      "color": {
+                        "r": 255,
+                        "g": 255,
+                        "b": 255,
+                        "a": 1
+                      },
+                      "lineHeight": 52,
+                      "letterSpacing": -1.32,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "n97f1a837",
+                "name": "p.hero__lead",
+                "role": "text",
+                "frame": {
+                  "x": 32,
+                  "y": 204,
+                  "w": 640,
+                  "h": 56
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 22,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Every rectangle, every run of type, every shadow — reconstructed as editable vector art.",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 18,
+                      "color": {
+                        "r": 255,
+                        "g": 255,
+                        "b": 255,
+                        "a": 0.86
+                      },
+                      "lineHeight": 28,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": false
+                }
+              },
+              {
+                "id": "n9154158d",
+                "name": "a.hero__cta",
+                "role": "text",
+                "frame": {
+                  "x": 32,
+                  "y": 288,
+                  "w": 154.688,
+                  "h": 41
+                },
+                "paint": {
+                  "radius": [
+                    20.5,
+                    20.5,
+                    20.5,
+                    20.5
+                  ],
+                  "opacity": 1,
+                  "fill": {
+                    "kind": "solid",
+                    "color": {
+                      "r": 255,
+                      "g": 183,
+                      "b": 3,
+                      "a": 1
+                    }
+                  },
+                  "shadows": [
+                    {
+                      "inset": false,
+                      "offsetX": 0,
+                      "offsetY": 8,
+                      "blur": 20,
+                      "spread": -6,
+                      "color": {
+                        "r": 0,
+                        "g": 0,
+                        "b": 0,
+                        "a": 0.24
+                      }
+                    }
+                  ]
+                },
+                "clip": false,
+                "stackingOrder": 23,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Start capturing",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 700,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 15,
+                      "color": {
+                        "r": 22,
+                        "g": 32,
+                        "b": 46,
+                        "a": 1
+                      },
+                      "lineHeight": 18,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": false
+                },
+                "unsupportedReasons": [
+                  "radius-scaled-to-fit"
+                ]
+              }
+            ],
+            "cssPosition": "relative"
+          }
+        ],
+        "cssPosition": "relative"
+      },
+      {
+        "id": "nde51b199",
+        "name": "header.topbar",
+        "role": "box",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 1280,
+          "h": 64
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 255,
+              "g": 255,
+              "b": 255,
+              "a": 0.92
+            }
+          },
+          "stroke": {
+            "widths": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "color": {
+              "r": 227,
+              "g": 232,
+              "b": 239,
+              "a": 1
+            },
+            "style": "solid",
+            "colors": [
+              {
+                "r": 22,
+                "g": 32,
+                "b": 46,
+                "a": 1
+              },
+              {
+                "r": 22,
+                "g": 32,
+                "b": 46,
+                "a": 1
+              },
+              {
+                "r": 227,
+                "g": 232,
+                "b": 239,
+                "a": 1
+              },
+              {
+                "r": 22,
+                "g": 32,
+                "b": 46,
+                "a": 1
+              }
+            ],
+            "styles": [
+              "none",
+              "none",
+              "solid",
+              "none"
+            ]
+          },
+          "shadows": [
+            {
+              "inset": false,
+              "offsetX": 0,
+              "offsetY": 1,
+              "blur": 3,
+              "spread": 0,
+              "color": {
+                "r": 16,
+                "g": 32,
+                "b": 46,
+                "a": 0.06
+              }
+            }
+          ]
+        },
+        "clip": false,
+        "stackingOrder": 25,
+        "children": [
+          {
+            "id": "n987e3480",
+            "name": "span.topbar__brand",
+            "role": "text",
+            "frame": {
+              "x": 32,
+              "y": 21,
+              "w": 85.75,
+              "h": 21
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1
+            },
+            "clip": false,
+            "stackingOrder": 26,
+            "children": [],
+            "text": {
+              "runs": [
+                {
+                  "chars": "Northwind",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 700,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 18,
+                  "color": {
+                    "r": 22,
+                    "g": 32,
+                    "b": 46,
+                    "a": 1
+                  },
+                  "lineHeight": 21.6,
+                  "letterSpacing": -0.36,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": true
+            }
+          },
+          {
+            "id": "n4abe81f6",
+            "name": "nav.topbar__nav",
+            "role": "box",
+            "frame": {
+              "x": 1070.047,
+              "y": 23.5,
+              "w": 177.953,
+              "h": 16
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1
+            },
+            "clip": false,
+            "stackingOrder": 27,
+            "children": [
+              {
+                "id": "n232b5408",
+                "name": "a.topbar__link",
+                "role": "text",
+                "frame": {
+                  "x": 1070.047,
+                  "y": 23.5,
+                  "w": 55.25,
+                  "h": 16
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 28,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Features",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 71,
+                        "g": 83,
+                        "b": 107,
+                        "a": 1
+                      },
+                      "lineHeight": 16.8,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "n205f994f",
+                "name": "a.topbar__link (2)",
+                "role": "text",
+                "frame": {
+                  "x": 1149.297,
+                  "y": 23.5,
+                  "w": 42.797,
+                  "h": 16
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 29,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Pricing",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 71,
+                        "g": 83,
+                        "b": 107,
+                        "a": 1
+                      },
+                      "lineHeight": 16.8,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              },
+              {
+                "id": "nbaacd0d6",
+                "name": "a.topbar__link (3)",
+                "role": "text",
+                "frame": {
+                  "x": 1216.094,
+                  "y": 23.5,
+                  "w": 31.906,
+                  "h": 16
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "clip": false,
+                "stackingOrder": 30,
+                "children": [],
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "Docs",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 71,
+                        "g": 83,
+                        "b": 107,
+                        "a": 1
+                      },
+                      "lineHeight": 16.8,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                }
+              }
+            ]
+          }
+        ],
+        "cssPosition": "sticky",
+        "unsupportedReasons": [
+          "border-widths-differ"
+        ]
+      }
+    ]
+  }
+}

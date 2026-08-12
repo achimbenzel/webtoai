@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>web2ai</title>
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <h1 class="head__title">web2ai</h1>
+      <span class="head__version" id="version"></span>
+    </header>
+
+    <form class="form" id="options">
+      <fieldset class="group">
+        <legend class="group__legend">Scope</legend>
+
+        <label class="row">
+          <input type="radio" name="scope" value="full" id="scope-full" />
+          <span>Full page</span>
+        </label>
+        <label class="row">
+          <input type="radio" name="scope" value="viewport" id="scope-viewport" />
+          <span>Viewport only</span>
+        </label>
+
+        <label class="row row--stack">
+          <span class="row__label">Root selector</span>
+          <input
+            type="text"
+            id="root-selector"
+            placeholder="body (leave empty for the whole page)"
+            spellcheck="false"
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="row row--stack">
+          <span class="row__label">Max depth</span>
+          <input type="number" id="max-depth" min="1" max="200" step="1" />
+        </label>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend class="group__legend">Output</legend>
+
+        <label class="row">
+          <input type="checkbox" id="embed-images" />
+          <span>Embed images</span>
+        </label>
+        <label class="row">
+          <input type="checkbox" id="text-as-outlines" />
+          <span>Text as outlines</span>
+        </label>
+        <label class="row">
+          <input type="checkbox" id="pseudo-elements" />
+          <span>Capture ::before / ::after</span>
+        </label>
+        <label class="row">
+          <input type="checkbox" id="capture-canvas" />
+          <span>Rasterise &lt;canvas&gt;</span>
+        </label>
+      </fieldset>
+
+      <button class="capture" type="submit" id="capture">Capture page</button>
+    </form>
+
+    <output class="status" id="status" aria-live="polite"></output>
+
+    <section class="results" id="results" hidden>
+      <dl class="stats" id="stats"></dl>
+      <details class="report" id="report-wrap">
+        <summary class="report__summary" id="report-summary">Report</summary>
+        <table class="report__table">
+          <tbody id="report-rows"></tbody>
+        </table>
+      </details>
+    </section>
+
+    <script src="./popup.js" defer></script>
+  </body>
+</html>

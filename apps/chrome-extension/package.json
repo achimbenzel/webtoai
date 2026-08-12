@@ -1,0 +1,20 @@
+{
+  "name": "@web2ai/chrome-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "web2ai capture side — MV3 extension that serialises a page's rendered UI into ui-scene@1.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --watch",
+    "typecheck": "tsc -p tsconfig.json",
+    "zip": "node scripts/build.mjs --zip"
+  },
+  "dependencies": {
+    "@web2ai/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "vite": "^7.1.12"
+  }
+}

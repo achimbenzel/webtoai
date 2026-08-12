@@ -1,0 +1,866 @@
+{
+  "version": 1,
+  "source": {
+    "url": "fixture://typography/index.html",
+    "title": "web2ai fixture — typography and shapes",
+    "capturedAt": "2026-01-01T00:00:00.000Z",
+    "viewport": {
+      "w": 1280,
+      "h": 800,
+      "dpr": 1
+    },
+    "document": {
+      "w": 1280,
+      "h": 800
+    }
+  },
+  "options": {
+    "fullPage": true,
+    "rootSelector": "",
+    "textAsOutlines": false,
+    "embedImages": false,
+    "maxDepth": 32,
+    "minNodeArea": 1,
+    "skipSelectors": [
+      "script",
+      "style",
+      "noscript",
+      "template",
+      "link",
+      "meta",
+      "title",
+      "head"
+    ],
+    "capturePseudoElements": true,
+    "captureCanvas": true
+  },
+  "fonts": [
+    {
+      "family": "Georgia",
+      "weight": 700,
+      "style": "normal",
+      "isWebFont": false,
+      "stack": "Georgia, serif"
+    },
+    {
+      "family": "Georgia",
+      "weight": 400,
+      "style": "normal",
+      "isWebFont": false,
+      "stack": "Georgia, serif"
+    },
+    {
+      "family": "Georgia",
+      "weight": 400,
+      "style": "italic",
+      "isWebFont": false,
+      "stack": "Georgia, serif"
+    },
+    {
+      "family": "Courier New",
+      "weight": 400,
+      "style": "normal",
+      "isWebFont": false,
+      "stack": "\"Courier New\", monospace"
+    }
+  ],
+  "assets": [],
+  "root": {
+    "id": "n386a6491",
+    "name": "body",
+    "role": "box",
+    "frame": {
+      "x": 0,
+      "y": 0,
+      "w": 784,
+      "h": 702
+    },
+    "paint": {
+      "radius": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "opacity": 1,
+      "fill": {
+        "kind": "solid",
+        "color": {
+          "r": 255,
+          "g": 253,
+          "b": 248,
+          "a": 1
+        }
+      }
+    },
+    "clip": false,
+    "stackingOrder": 0,
+    "children": [
+      {
+        "id": "nc84c10df",
+        "name": "h1.single-line",
+        "role": "text",
+        "frame": {
+          "x": 32,
+          "y": 32,
+          "w": 720,
+          "h": 36
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1
+        },
+        "clip": false,
+        "stackingOrder": 1,
+        "children": [],
+        "text": {
+          "runs": [
+            {
+              "chars": "One line of display type",
+              "font": {
+                "family": "Georgia",
+                "weight": 700,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 28,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 36,
+              "letterSpacing": -0.56,
+              "align": "start"
+            }
+          ],
+          "isSingleLine": true
+        }
+      },
+      {
+        "id": "n4e6ae5dd",
+        "name": "p.paragraph",
+        "role": "text",
+        "frame": {
+          "x": 32,
+          "y": 88,
+          "w": 420,
+          "h": 78
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1
+        },
+        "clip": false,
+        "stackingOrder": 2,
+        "children": [],
+        "text": {
+          "runs": [
+            {
+              "chars": "A paragraph with ",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 16,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 26,
+              "letterSpacing": 0,
+              "align": "start"
+            },
+            {
+              "chars": "bold",
+              "font": {
+                "family": "Georgia",
+                "weight": 700,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 16,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 26,
+              "letterSpacing": 0,
+              "align": "start"
+            },
+            {
+              "chars": ", ",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 16,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 26,
+              "letterSpacing": 0,
+              "align": "start"
+            },
+            {
+              "chars": "italic",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "italic",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 16,
+              "color": {
+                "r": 138,
+                "g": 75,
+                "b": 0,
+                "a": 1
+              },
+              "lineHeight": 26,
+              "letterSpacing": 0,
+              "align": "start"
+            },
+            {
+              "chars": " and an ",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 16,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 26,
+              "letterSpacing": 0,
+              "align": "start"
+            },
+            {
+              "chars": "underlined link",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 16,
+              "color": {
+                "r": 26,
+                "g": 95,
+                "b": 180,
+                "a": 1
+              },
+              "lineHeight": 26,
+              "letterSpacing": 0,
+              "align": "start",
+              "decoration": "underline"
+            },
+            {
+              "chars": " mixed into it, long enough to wrap onto more than a single rendered line so the walker has to say so.",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 16,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 26,
+              "letterSpacing": 0,
+              "align": "start"
+            }
+          ],
+          "isSingleLine": false
+        },
+        "unsupportedReasons": [
+          "text-multiple-runs"
+        ]
+      },
+      {
+        "id": "n385f17d1",
+        "name": "pre.preformatted",
+        "role": "text",
+        "frame": {
+          "x": 32,
+          "y": 190,
+          "w": 720,
+          "h": 60
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 243,
+              "g": 239,
+              "b": 230,
+              "a": 1
+            }
+          },
+          "stroke": {
+            "widths": [
+              0,
+              0,
+              0,
+              4
+            ],
+            "color": {
+              "r": 201,
+              "g": 162,
+              "b": 39,
+              "a": 1
+            },
+            "style": "solid",
+            "colors": [
+              {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              {
+                "r": 201,
+                "g": 162,
+                "b": 39,
+                "a": 1
+              }
+            ],
+            "styles": [
+              "none",
+              "none",
+              "none",
+              "solid"
+            ]
+          }
+        },
+        "clip": false,
+        "stackingOrder": 3,
+        "children": [],
+        "text": {
+          "runs": [
+            {
+              "chars": "  indented    text\n  keeps   its   spaces",
+              "font": {
+                "family": "Courier New",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "\"Courier New\", monospace"
+              },
+              "size": 13,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 18,
+              "letterSpacing": 0,
+              "align": "start"
+            }
+          ],
+          "isSingleLine": false
+        },
+        "unsupportedReasons": [
+          "border-widths-differ",
+          "text-preformatted-whitespace-preserved"
+        ]
+      },
+      {
+        "id": "nd48b5e67",
+        "name": "p.shouty",
+        "role": "text",
+        "frame": {
+          "x": 32,
+          "y": 274,
+          "w": 720,
+          "h": 15
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1
+        },
+        "clip": false,
+        "stackingOrder": 4,
+        "children": [],
+        "text": {
+          "runs": [
+            {
+              "chars": "TRACKED OUT AND UPPERCASED BY CSS",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 12,
+              "color": {
+                "r": 107,
+                "g": 98,
+                "b": 87,
+                "a": 1
+              },
+              "lineHeight": 14.4,
+              "letterSpacing": 1.68,
+              "align": "start"
+            }
+          ],
+          "isSingleLine": true
+        }
+      },
+      {
+        "id": "n12f1117d",
+        "name": "div.swatches",
+        "role": "box",
+        "frame": {
+          "x": 32,
+          "y": 313,
+          "w": 720,
+          "h": 92
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1
+        },
+        "clip": false,
+        "stackingOrder": 5,
+        "children": [
+          {
+            "id": "n43ec1943",
+            "name": "div.swatch.swatch--pill",
+            "role": "box",
+            "frame": {
+              "x": 32,
+              "y": 313,
+              "w": 120,
+              "h": 80
+            },
+            "paint": {
+              "radius": [
+                40,
+                40,
+                40,
+                40
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 26,
+                  "g": 95,
+                  "b": 180,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 6,
+            "children": [],
+            "unsupportedReasons": [
+              "radius-scaled-to-fit"
+            ]
+          },
+          {
+            "id": "nd67c8cb8",
+            "name": "div.swatch.swatch--mixed",
+            "role": "box",
+            "frame": {
+              "x": 168,
+              "y": 313,
+              "w": 120,
+              "h": 80
+            },
+            "paint": {
+              "radius": [
+                24,
+                4,
+                24,
+                4
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 201,
+                  "g": 162,
+                  "b": 39,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 7,
+            "children": []
+          },
+          {
+            "id": "n68688a65",
+            "name": "div.swatch.swatch--elliptical",
+            "role": "box",
+            "frame": {
+              "x": 304,
+              "y": 313,
+              "w": 120,
+              "h": 80
+            },
+            "paint": {
+              "radius": [
+                60,
+                60,
+                60,
+                60
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 138,
+                  "g": 75,
+                  "b": 0,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 8,
+            "children": [],
+            "unsupportedReasons": [
+              "radius-elliptical-approximated"
+            ]
+          },
+          {
+            "id": "n074dd47a",
+            "name": "div.swatch.swatch--bordered",
+            "role": "box",
+            "frame": {
+              "x": 440,
+              "y": 313,
+              "w": 124,
+              "h": 92
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 255,
+                  "g": 253,
+                  "b": 248,
+                  "a": 1
+                }
+              },
+              "stroke": {
+                "widths": [
+                  6,
+                  2,
+                  6,
+                  2
+                ],
+                "color": {
+                  "r": 26,
+                  "g": 95,
+                  "b": 180,
+                  "a": 1
+                },
+                "style": "solid",
+                "colors": [
+                  {
+                    "r": 26,
+                    "g": 95,
+                    "b": 180,
+                    "a": 1
+                  },
+                  {
+                    "r": 201,
+                    "g": 162,
+                    "b": 39,
+                    "a": 1
+                  },
+                  {
+                    "r": 138,
+                    "g": 75,
+                    "b": 0,
+                    "a": 1
+                  },
+                  {
+                    "r": 33,
+                    "g": 37,
+                    "b": 43,
+                    "a": 1
+                  }
+                ],
+                "styles": [
+                  "solid",
+                  "dashed",
+                  "solid",
+                  "dashed"
+                ]
+              }
+            },
+            "clip": false,
+            "stackingOrder": 9,
+            "children": [],
+            "unsupportedReasons": [
+              "border-widths-differ"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "n21d0d6e2",
+        "name": "div.shadowed",
+        "role": "box",
+        "frame": {
+          "x": 32,
+          "y": 429,
+          "w": 200,
+          "h": 80
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 255,
+              "g": 255,
+              "b": 255,
+              "a": 1
+            }
+          },
+          "shadows": [
+            {
+              "inset": false,
+              "offsetX": 0,
+              "offsetY": 2,
+              "blur": 4,
+              "spread": 0,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 0.18
+              }
+            },
+            {
+              "inset": false,
+              "offsetX": 0,
+              "offsetY": 12,
+              "blur": 28,
+              "spread": -6,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 0.12
+              }
+            }
+          ]
+        },
+        "clip": false,
+        "stackingOrder": 10,
+        "children": [],
+        "unsupportedReasons": [
+          "shadow-multiple"
+        ]
+      },
+      {
+        "id": "n4e974d33",
+        "name": "p.quoted",
+        "role": "text",
+        "frame": {
+          "x": 32,
+          "y": 617,
+          "w": 720,
+          "h": 35
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1
+        },
+        "clip": false,
+        "stackingOrder": 11,
+        "children": [],
+        "text": {
+          "runs": [
+            {
+              "chars": "“",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 40,
+              "color": {
+                "r": 201,
+                "g": 162,
+                "b": 39,
+                "a": 1
+              },
+              "lineHeight": 28,
+              "letterSpacing": 0,
+              "align": "start"
+            },
+            {
+              "chars": "A pseudo-element supplies the opening quote mark.",
+              "font": {
+                "family": "Georgia",
+                "weight": 400,
+                "style": "normal",
+                "isWebFont": false,
+                "stack": "Georgia, serif"
+              },
+              "size": 18,
+              "color": {
+                "r": 33,
+                "g": 37,
+                "b": 43,
+                "a": 1
+              },
+              "lineHeight": 28,
+              "letterSpacing": 0,
+              "align": "start"
+            }
+          ],
+          "isSingleLine": true
+        },
+        "unsupportedReasons": [
+          "pseudo-element-merged-into-text"
+        ]
+      },
+      {
+        "id": "n839fc523",
+        "name": "div.rotated",
+        "role": "box",
+        "frame": {
+          "x": 51.805,
+          "y": 513.516,
+          "w": 127.183,
+          "h": 76.117
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 208,
+              "g": 191,
+              "b": 255,
+              "a": 1
+            }
+          }
+        },
+        "clip": false,
+        "stackingOrder": 12,
+        "children": [],
+        "transform": [
+          0.990268,
+          -0.139173,
+          0.139173,
+          0.990268,
+          19.8054,
+          -2.78346
+        ],
+        "transformOrigin": {
+          "x": 0,
+          "y": 0
+        },
+        "unsupportedReasons": [
+          "transform-baked-into-bounds"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>web2ai fixture — stacking contexts</title>
+    <style>
+      /* Every box is labelled with the paint layer it belongs to. Read top to
+         bottom in the rendered page: what overlaps what is the whole point. */
+      body {
+        margin: 0;
+        padding: 24px;
+        font:
+          14px/20px Arial,
+          sans-serif;
+        background: #ffffff;
+      }
+      .stage {
+        position: relative;
+        width: 600px;
+        height: 320px;
+        margin-bottom: 32px;
+        background: #eef2f7;
+        border: 1px solid #c3ccd9;
+      }
+      .box {
+        position: absolute;
+        width: 160px;
+        height: 100px;
+        padding: 6px;
+        color: #ffffff;
+        font-size: 12px;
+      }
+
+      /* 1. A negative z-index child paints behind its parent's content. */
+      .behind {
+        left: 20px;
+        top: 20px;
+        z-index: -1;
+        background: #6b7688;
+      }
+      /* 2. Plain in-flow content. */
+      .flow {
+        position: static;
+        margin: 40px 0 0 60px;
+        width: 200px;
+        height: 120px;
+        background: #2f6fdd;
+        color: #ffffff;
+        padding: 6px;
+        font-size: 12px;
+      }
+      /* 3. Positioned with z-index: auto — above in-flow content. */
+      .auto-positioned {
+        left: 140px;
+        top: 90px;
+        background: #1f8a4c;
+      }
+      /* 4. Explicit positive z-index. */
+      .z2 {
+        left: 240px;
+        top: 40px;
+        z-index: 2;
+        background: #d93025;
+      }
+      .z10 {
+        left: 320px;
+        top: 130px;
+        z-index: 10;
+        background: #b8008a;
+      }
+
+      /* An opacity wrapper creates a stacking context: the z-index: 999 inside
+         it must NOT escape above .z10. */
+      .trap {
+        position: absolute;
+        left: 40px;
+        top: 180px;
+        width: 260px;
+        height: 110px;
+        opacity: 0.99;
+        background: #ffb703;
+      }
+      .trap__inner {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        z-index: 999;
+        width: 150px;
+        height: 60px;
+        padding: 6px;
+        background: #16202e;
+        color: #ffffff;
+        font-size: 12px;
+      }
+
+      /* A wrapper that is NOT a stacking context: its z-index: 999 child does
+         escape and paints above everything in the stage. */
+      .passthrough {
+        position: absolute;
+        left: 380px;
+        top: 200px;
+        width: 200px;
+        height: 100px;
+        background: #c3ccd9;
+      }
+      .passthrough__escapee {
+        position: absolute;
+        left: 30px;
+        top: -60px;
+        z-index: 999;
+        width: 150px;
+        height: 60px;
+        padding: 6px;
+        background: #0b7285;
+        color: #ffffff;
+        font-size: 12px;
+      }
+
+      /* Floats and inline content have their own paint steps. */
+      .flow-stage {
+        position: relative;
+        width: 600px;
+        padding: 12px;
+        background: #f6f8fb;
+        border: 1px solid #c3ccd9;
+      }
+      .floated {
+        float: left;
+        width: 120px;
+        height: 60px;
+        margin-right: 12px;
+        background: #ffd6a5;
+      }
+      .inline-el {
+        display: inline-block;
+        padding: 4px 8px;
+        background: #caffbf;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="box behind">z-index: -1</div>
+      <div class="flow">in-flow block</div>
+      <div class="box auto-positioned">positioned, z auto</div>
+      <div class="box z2">z-index: 2</div>
+      <div class="box z10">z-index: 10</div>
+
+      <div class="trap">
+        opacity: 0.99 wrapper
+        <div class="trap__inner">z-index: 999, trapped</div>
+      </div>
+
+      <div class="passthrough">
+        plain wrapper
+        <div class="passthrough__escapee">z-index: 999, escapes</div>
+      </div>
+    </div>
+
+    <div class="flow-stage">
+      <div class="floated">float: left</div>
+      <span class="inline-el">inline-block</span>
+      <p>Block-level text after the float.</p>
+    </div>
+  </body>
+</html>

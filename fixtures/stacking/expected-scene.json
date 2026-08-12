@@ -1,0 +1,813 @@
+{
+  "version": 1,
+  "source": {
+    "url": "fixture://stacking/index.html",
+    "title": "web2ai fixture — stacking contexts",
+    "capturedAt": "2026-01-01T00:00:00.000Z",
+    "viewport": {
+      "w": 1280,
+      "h": 800,
+      "dpr": 1
+    },
+    "document": {
+      "w": 1280,
+      "h": 800
+    }
+  },
+  "options": {
+    "fullPage": true,
+    "rootSelector": "",
+    "textAsOutlines": false,
+    "embedImages": false,
+    "maxDepth": 32,
+    "minNodeArea": 1,
+    "skipSelectors": [
+      "script",
+      "style",
+      "noscript",
+      "template",
+      "link",
+      "meta",
+      "title",
+      "head"
+    ],
+    "capturePseudoElements": true,
+    "captureCanvas": true
+  },
+  "fonts": [
+    {
+      "family": "Arial",
+      "weight": 400,
+      "style": "normal",
+      "isWebFont": false,
+      "stack": "Arial, sans-serif"
+    }
+  ],
+  "assets": [],
+  "root": {
+    "id": "n386a6491",
+    "name": "body",
+    "role": "box",
+    "frame": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 504
+    },
+    "paint": {
+      "radius": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "opacity": 1,
+      "fill": {
+        "kind": "solid",
+        "color": {
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 1
+        }
+      }
+    },
+    "clip": false,
+    "stackingOrder": 0,
+    "children": [
+      {
+        "id": "n9e564a91",
+        "name": "div.stage",
+        "role": "box",
+        "frame": {
+          "x": 24,
+          "y": 24,
+          "w": 602,
+          "h": 322
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 238,
+              "g": 242,
+              "b": 247,
+              "a": 1
+            }
+          },
+          "stroke": {
+            "widths": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "color": {
+              "r": 195,
+              "g": 204,
+              "b": 217,
+              "a": 1
+            },
+            "style": "solid"
+          }
+        },
+        "clip": false,
+        "stackingOrder": 2,
+        "children": [
+          {
+            "id": "ne360238f",
+            "name": "div.box.behind",
+            "role": "text",
+            "frame": {
+              "x": 45,
+              "y": 45,
+              "w": 172,
+              "h": 112
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 107,
+                  "g": 118,
+                  "b": 136,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 1,
+            "children": [],
+            "cssPosition": "absolute",
+            "text": {
+              "runs": [
+                {
+                  "chars": "z-index: -1",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 12,
+                  "color": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": false
+            }
+          },
+          {
+            "id": "n8cf49504",
+            "name": "div.flow",
+            "role": "text",
+            "frame": {
+              "x": 85,
+              "y": 65,
+              "w": 212,
+              "h": 132
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 47,
+                  "g": 111,
+                  "b": 221,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 3,
+            "children": [],
+            "text": {
+              "runs": [
+                {
+                  "chars": "in-flow block",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 12,
+                  "color": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": false
+            }
+          },
+          {
+            "id": "n6b70c721",
+            "name": "div.box.auto-positioned",
+            "role": "text",
+            "frame": {
+              "x": 165,
+              "y": 115,
+              "w": 172,
+              "h": 112
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 31,
+                  "g": 138,
+                  "b": 76,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 4,
+            "children": [],
+            "cssPosition": "absolute",
+            "text": {
+              "runs": [
+                {
+                  "chars": "positioned, z auto",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 12,
+                  "color": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": false
+            }
+          },
+          {
+            "id": "n1b1a1218",
+            "name": "div.trap",
+            "role": "box",
+            "frame": {
+              "x": 65,
+              "y": 205,
+              "w": 260,
+              "h": 110
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 0.99,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 255,
+                  "g": 183,
+                  "b": 3,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 5,
+            "children": [
+              {
+                "id": "n42d5d03c",
+                "name": "div.trap__inner",
+                "role": "text",
+                "frame": {
+                  "x": 85,
+                  "y": 225,
+                  "w": 162,
+                  "h": 72
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1,
+                  "fill": {
+                    "kind": "solid",
+                    "color": {
+                      "r": 22,
+                      "g": 32,
+                      "b": 46,
+                      "a": 1
+                    }
+                  }
+                },
+                "clip": false,
+                "stackingOrder": 6,
+                "children": [],
+                "cssPosition": "absolute",
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "z-index: 999, trapped",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 12,
+                      "color": {
+                        "r": 255,
+                        "g": 255,
+                        "b": 255,
+                        "a": 1
+                      },
+                      "lineHeight": 20,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": false
+                }
+              }
+            ],
+            "cssPosition": "absolute"
+          },
+          {
+            "id": "nd684dcc5",
+            "name": "div.passthrough",
+            "role": "box",
+            "frame": {
+              "x": 405,
+              "y": 225,
+              "w": 200,
+              "h": 100
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 195,
+                  "g": 204,
+                  "b": 217,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 7,
+            "children": [
+              {
+                "id": "ne22ce0fd",
+                "name": "div.passthrough__escapee",
+                "role": "text",
+                "frame": {
+                  "x": 435,
+                  "y": 165,
+                  "w": 162,
+                  "h": 72
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1,
+                  "fill": {
+                    "kind": "solid",
+                    "color": {
+                      "r": 11,
+                      "g": 114,
+                      "b": 133,
+                      "a": 1
+                    }
+                  }
+                },
+                "clip": false,
+                "stackingOrder": 14,
+                "children": [],
+                "cssPosition": "absolute",
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "z-index: 999, escapes",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 12,
+                      "color": {
+                        "r": 255,
+                        "g": 255,
+                        "b": 255,
+                        "a": 1
+                      },
+                      "lineHeight": 20,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": false
+                }
+              }
+            ],
+            "cssPosition": "absolute"
+          },
+          {
+            "id": "n046392f6",
+            "name": "div.box.z2",
+            "role": "text",
+            "frame": {
+              "x": 265,
+              "y": 65,
+              "w": 172,
+              "h": 112
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 217,
+                  "g": 48,
+                  "b": 37,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 12,
+            "children": [],
+            "cssPosition": "absolute",
+            "text": {
+              "runs": [
+                {
+                  "chars": "z-index: 2",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 12,
+                  "color": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": false
+            }
+          },
+          {
+            "id": "n8ac17223",
+            "name": "div.box.z10",
+            "role": "text",
+            "frame": {
+              "x": 345,
+              "y": 155,
+              "w": 172,
+              "h": 112
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 184,
+                  "g": 0,
+                  "b": 138,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 13,
+            "children": [],
+            "cssPosition": "absolute",
+            "text": {
+              "runs": [
+                {
+                  "chars": "z-index: 10",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 12,
+                  "color": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": false
+            }
+          }
+        ],
+        "cssPosition": "relative"
+      },
+      {
+        "id": "n0bfda776",
+        "name": "div.flow-stage",
+        "role": "box",
+        "frame": {
+          "x": 24,
+          "y": 378,
+          "w": 626,
+          "h": 102
+        },
+        "paint": {
+          "radius": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "opacity": 1,
+          "fill": {
+            "kind": "solid",
+            "color": {
+              "r": 246,
+              "g": 248,
+              "b": 251,
+              "a": 1
+            }
+          },
+          "stroke": {
+            "widths": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "color": {
+              "r": 195,
+              "g": 204,
+              "b": 217,
+              "a": 1
+            },
+            "style": "solid"
+          }
+        },
+        "clip": false,
+        "stackingOrder": 8,
+        "children": [
+          {
+            "id": "nea248afd",
+            "name": "p",
+            "role": "text",
+            "frame": {
+              "x": 37,
+              "y": 433,
+              "w": 600,
+              "h": 20
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1
+            },
+            "clip": false,
+            "stackingOrder": 9,
+            "children": [],
+            "text": {
+              "runs": [
+                {
+                  "chars": "Block-level text after the float.",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 14,
+                  "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": true
+            }
+          },
+          {
+            "id": "nb92a234c",
+            "name": "div.floated",
+            "role": "text",
+            "frame": {
+              "x": 37,
+              "y": 391,
+              "w": 120,
+              "h": 60
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 255,
+                  "g": 214,
+                  "b": 165,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 10,
+            "children": [],
+            "text": {
+              "runs": [
+                {
+                  "chars": "float: left",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 14,
+                  "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": false
+            }
+          },
+          {
+            "id": "n1e7292b8",
+            "name": "span.inline-el",
+            "role": "text",
+            "frame": {
+              "x": 169,
+              "y": 391,
+              "w": 86.047,
+              "h": 28
+            },
+            "paint": {
+              "radius": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "opacity": 1,
+              "fill": {
+                "kind": "solid",
+                "color": {
+                  "r": 202,
+                  "g": 255,
+                  "b": 191,
+                  "a": 1
+                }
+              }
+            },
+            "clip": false,
+            "stackingOrder": 11,
+            "children": [],
+            "text": {
+              "runs": [
+                {
+                  "chars": "inline-block",
+                  "font": {
+                    "family": "Arial",
+                    "weight": 400,
+                    "style": "normal",
+                    "isWebFont": false,
+                    "stack": "Arial, sans-serif"
+                  },
+                  "size": 14,
+                  "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0,
+                    "a": 1
+                  },
+                  "lineHeight": 20,
+                  "letterSpacing": 0,
+                  "align": "start"
+                }
+              ],
+              "isSingleLine": true
+            }
+          }
+        ],
+        "cssPosition": "relative"
+      }
+    ]
+  }
+}

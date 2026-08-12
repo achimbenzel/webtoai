@@ -76,4 +76,12 @@ export default tseslint.config(
     },
     rules: { "no-console": "off" },
   },
+  {
+    // Runs under Node but ships closures into a browser page via
+    // page.evaluate(), so it legitimately references DOM globals.
+    files: ["scripts/capture-fixtures.mjs"],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
+    },
+  },
 );
