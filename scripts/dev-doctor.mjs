@@ -17,9 +17,11 @@ import { join } from "node:path";
 import {
   BUNDLE_ID,
   CSXS_VERSIONS_PROBED,
+  compareVersions,
   distDir,
   extensionsDir,
   installTarget,
+  hostRangeAccepts,
   linkKind,
   linkTarget,
   readManifest,
@@ -162,19 +164,164 @@ function checkInstall() {
     else line("fail", `${label} NOT reachable through the installed path`, resolved);
   }
 
-  // Neighbours are the most useful comparison there is: if the user's own
-  // extensions load and ours does not, the difference is visible right here.
+  compareWithNeighbours(dir);
+}
+
+/**
+ * Compares our manifest against the extensions that *do* load.
+ *
+ * When everything about our own install checks out and the panel is still
+ * absent, the remaining causes are all declarative: CEP silently drops an
+ * extension whose `<Host>` range excludes the running Illustrator, or whose
+ * `RequiredRuntime` asks for a newer CSXS than this Illustrator provides. A
+ * neighbour that loads is a working example of what this machine accepts, so
+ * the difference between their manifest and ours is the answer.
+ */
+function compareWithNeighbours(dir) {
   const neighbours = readdirSync(dir).filter((name) => name !== BUNDLE_ID && !name.startsWith("."));
-  if (neighbours.length > 0) {
-    line("info", `other installed extensions (${neighbours.length}):`);
-    for (const name of neighbours.slice(0, 12)) {
-      const kindOf = linkKind(join(dir, name));
-      const hasManifest = existsSync(join(dir, name, "CSXS", "manifest.xml"));
-      console.log(
-        `          ${name}  [${kindOf}${hasManifest ? ", has manifest" : ", NO manifest"}]`,
-      );
+  if (neighbours.length === 0) return;
+
+  const ours = readManifest(distDir);
+  const rows = [];
+
+  for (const name of neighbours) {
+    const manifest = readManifest(join(dir, name));
+    if (!manifest.exists) continue;
+    rows.push({
+      name,
+      kind: linkKind(join(dir, name)),
+      runtime: manifest.requiredRuntime,
+      host: manifest.hostVersion,
+      hostName: manifest.hostName,
+      debug: existsSync(join(dir, name, ".debug")),
+    });
+  }
+
+  if (rows.length === 0) return;
+
+  line("info", `extensions that already load here (${rows.length}):`);
+  const pad = (value, width) => String(value ?? "?").padEnd(width);
+  console.log(`          ${pad("name", 26)} ${pad("CSXS", 6)} ${pad("host range", 18)} .debug`);
+  for (const row of rows) {
+    console.log(
+      `          ${pad(row.name, 26)} ${pad(row.runtime, 6)} ` +
+        `${pad(`${row.hostName ?? "?"} ${row.host ?? "?"}`, 18)} ${row.debug ? "yes" : "no"}`,
+    );
+  }
+  console.log(
+    `          ${pad("→ web2ai (ours)", 26)} ${pad(ours.requiredRuntime, 6)} ` +
+      `${pad(`${ours.hostName ?? "?"} ${ours.hostVersion ?? "?"}`, 18)} ` +
+      `${existsSync(join(distDir, ".debug")) ? "yes" : "no"}`,
+  );
+
+  // A CSXS requirement above every working neighbour is a strong signal that
+  // this Illustrator runs an older CEP than the manifest demands.
+  const runtimes = rows.map((row) => row.runtime).filter((value) => value !== undefined);
+  const highest = runtimes.reduce(
+    (max, value) => (max === undefined || compareVersions(value, max) > 0 ? value : max),
+    undefined,
+  );
+  if (highest !== undefined && compareVersions(ours.requiredRuntime ?? "0", highest) > 0) {
+    line(
+      "warn",
+      `we require CSXS ${ours.requiredRuntime}, but no extension that loads here asks for more than ${highest}`,
+      "If this Illustrator runs an older CEP, it drops ours without a word. " +
+        "See the host-application check below.",
+    );
+  }
+
+  // Same reasoning for the host range: a neighbour accepting older Illustrator
+  // versions than we do says nothing on its own, but combined with a detected
+  // version outside our range it is conclusive.
+  const looserHost = rows.find(
+    (row) =>
+      row.host !== undefined &&
+      ours.hostVersion !== undefined &&
+      row.host !== ours.hostVersion &&
+      /^[[(]/.test(row.host),
+  );
+  if (looserHost !== undefined) {
+    line(
+      "info",
+      `host ranges differ: ${looserHost.name} accepts ${looserHost.host}, we accept ${ours.hostVersion}`,
+    );
+  }
+
+  const linked = rows.filter((row) => row.kind === "symlink");
+  if (linked.length === 0 && platform() === "win32") {
+    line(
+      "info",
+      "every extension that loads here is a plain folder — none is a link",
+      "If the checks above all pass, install a real copy: pnpm dev:install --copy",
+    );
+  }
+}
+
+// ── 2b. Which Illustrator is installed? ─────────────────────────────────────
+
+function installedIllustratorVersions() {
+  const os = platform();
+
+  if (os === "win32") {
+    const found = new Set();
+    for (const key of [
+      "HKLM\\SOFTWARE\\Adobe\\Illustrator",
+      "HKLM\\SOFTWARE\\WOW6432Node\\Adobe\\Illustrator",
+    ]) {
+      const result = spawnSync("reg.exe", ["query", key], { encoding: "utf8" });
+      if (result.status !== 0) continue;
+      for (const match of (result.stdout ?? "").matchAll(/\\Illustrator\\([\d]+\.[\d]+)/g)) {
+        if (match[1] !== undefined) found.add(match[1]);
+      }
+    }
+    return [...found].sort(compareVersions);
+  }
+
+  if (os === "darwin") {
+    try {
+      // /Applications/Adobe Illustrator 2024 — the folder carries the year,
+      // which is 2021 → 25.0, 2022 → 26.0, and so on.
+      return readdirSync("/Applications")
+        .map((name) => /^Adobe Illustrator (\d{4})$/.exec(name)?.[1])
+        .filter((year) => year !== undefined)
+        .map((year) => `${Number(year) - 1996}.0`)
+        .sort(compareVersions);
+    } catch {
+      return [];
     }
   }
+
+  return [];
+}
+
+function checkHostApplication() {
+  heading("Host application");
+
+  const versions = installedIllustratorVersions();
+  if (versions.length === 0) {
+    line("info", "could not detect an installed Illustrator — skipping the version check");
+    return;
+  }
+
+  const ours = readManifest(distDir);
+  line("info", `Illustrator version(s) found: ${versions.join(", ")}`);
+  line("info", `manifest accepts ${ours.hostName} ${ours.hostVersion}`);
+
+  const accepted = versions.filter(
+    (version) => hostRangeAccepts(ours.hostVersion, version) === true,
+  );
+  if (accepted.length > 0) {
+    line("ok", `${accepted.join(", ")} falls inside the manifest's host range`);
+    return;
+  }
+
+  line(
+    "fail",
+    `no installed Illustrator falls inside the manifest range ${ours.hostVersion}`,
+    `Illustrator ${versions.join(", ")} is outside it, so CEP will never list this panel. ` +
+      "Widen <Host Version> in apps/cep-extension/CSXS/manifest.xml — note that CEP 11 " +
+      "features (Node in the panel) need Illustrator 25.0 or newer.",
+  );
 }
 
 // ── 3. Will CEP load an unsigned extension? ─────────────────────────────────
@@ -270,10 +417,7 @@ function summary() {
 
   if (failures.length === 0 && warnings.length === 0) {
     console.log("Everything checks out.\n");
-    console.log("If the panel still does not appear under Window > Extensions:");
-    console.log("  1. Quit Illustrator completely — it only scans at startup.");
-    console.log("  2. Reinstall as a copy instead of a link:  pnpm dev:install --copy");
-    console.log("  3. Enable more CEP runtimes:               pnpm dev:install --csxs=11,12,13");
+    printRemainingSteps();
     return;
   }
 
@@ -284,15 +428,43 @@ function summary() {
   if (failures.length > 0) {
     console.log("Fix the FAIL lines above first, then restart Illustrator.");
     process.exitCode = 1;
-  } else {
-    console.log("No hard failures. Restart Illustrator; if it still does not appear, try");
-    console.log("  pnpm dev:install --copy");
+    return;
   }
+  console.log("No hard failures.");
+  printRemainingSteps();
+}
+
+/**
+ * What is left when every automated check passes.
+ *
+ * Ordered by how often each one turns out to be the answer, and each is a
+ * single command so they can be worked through quickly. Quitting Illustrator
+ * between attempts is not optional — it only scans extensions at startup.
+ */
+function printRemainingSteps() {
+  const debugFile = join(installTarget(), ".debug");
+  console.log("");
+  console.log("Remaining things to try, quitting Illustrator fully between each:");
+  console.log("");
+  console.log("  1. Install a real folder instead of a link:");
+  console.log("       pnpm dev:install --copy");
+  console.log("");
+  console.log("  2. Take the .debug file out of the equation — CEP's reader for it");
+  console.log("     is strict, and a file it dislikes costs the whole extension:");
+  console.log(`       rename ${debugFile} to .debug.off`);
+  console.log("");
+  console.log("  3. Enable PlayerDebugMode for further CEP runtimes:");
+  console.log("       pnpm dev:install --csxs=9,10,11,12,13");
+  console.log("");
+  console.log("  4. Compare against one that works: copy a loading extension's folder,");
+  console.log("     swap in our CSXS/manifest.xml, and see whether it disappears. That");
+  console.log("     isolates the manifest from everything else.");
 }
 
 console.log("web2ai CEP doctor");
 const built = checkBuild();
 if (built) checkHostBundle();
 checkInstall();
+checkHostApplication();
 checkDebugMode();
 summary();

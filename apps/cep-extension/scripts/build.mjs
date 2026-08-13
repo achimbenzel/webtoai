@@ -66,8 +66,10 @@ function buildDebugFile() {
   if (idMatch === null) throw new Error("Could not read the extension Id from CSXS/manifest.xml");
   const port = config.debug.cepRemoteDebugPort;
 
+  // No comment before the root element: CEP's reader for this file is stricter
+  // than a general XML parser, and a .debug it dislikes can cost the whole
+  // extension. The generated-file note lives in the build script instead.
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<!-- GENERATED from config/web2ai.config.json (debug.cepRemoteDebugPort). -->
 <ExtensionList>
   <Extension Id="${idMatch[1]}">
     <HostList>

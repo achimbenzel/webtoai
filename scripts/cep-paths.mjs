@@ -103,6 +103,43 @@ export function resolveManifestPath(root, manifestPath) {
   return join(root, manifestPath.replace(/^\.\//, ""));
 }
 
+/** Compares dotted version strings: -1, 0 or 1. */
+export function compareVersions(a, b) {
+  const left = String(a).split(".").map(Number);
+  const right = String(b).split(".").map(Number);
+  const length = Math.max(left.length, right.length);
+  for (let i = 0; i < length; i += 1) {
+    const l = left[i] ?? 0;
+    const r = right[i] ?? 0;
+    if (l < r) return -1;
+    if (l > r) return 1;
+  }
+  return 0;
+}
+
+/**
+ * Whether a manifest `<Host Version="…">` range accepts a host version.
+ *
+ * The range is CEP's own notation: `[25.0,99.9]` inclusive, `(25.0,99.9)`
+ * exclusive, or a bare minimum like `25.0`.
+ */
+export function hostRangeAccepts(range, version) {
+  if (range === undefined || version === undefined) return undefined;
+
+  const bounded = /^([[(])\s*([\d.]+)\s*,\s*([\d.]+)\s*([\])])$/.exec(range.trim());
+  if (bounded !== null) {
+    const [, open, min, max, close] = bounded;
+    const lowOk =
+      open === "[" ? compareVersions(version, min) >= 0 : compareVersions(version, min) > 0;
+    const highOk =
+      close === "]" ? compareVersions(version, max) <= 0 : compareVersions(version, max) < 0;
+    return lowOk && highOk;
+  }
+
+  if (/^[\d.]+$/.test(range.trim())) return compareVersions(version, range.trim()) >= 0;
+  return undefined;
+}
+
 /**
  * Checks that a folder is a *complete* extension.
  *
