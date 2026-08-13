@@ -8,10 +8,14 @@
  *     extension whose MainPath or ScriptPath does not resolve — no error, no
  *     log, it just never appears under Window > Extensions. A half-finished
  *     build looks entirely normal on disk, so it is checked before installing.
- *  2. The folder must live in a CEP extensions directory. We create a symlink
- *     to apps/cep-extension/dist so a rebuild is picked up by reopening the
- *     panel. Windows is the exception: CEP's scanner does not reliably follow
- *     reparse points there, so `--copy` exists for it.
+ *  2. The folder must live in a CEP extensions directory, under a plain name.
+ *     CEP takes the extension's identity from the manifest, not the directory,
+ *     and a reverse-DNS folder name is not what working panels use — so this
+ *     installs to `web2ai`, not to the bundle id. On macOS the folder is a
+ *     symlink to apps/cep-extension/dist, so a rebuild is picked up by
+ *     reopening the panel; on Windows it is a real copy, because CEP's scanner
+ *     does not reliably follow reparse points there. `--link` / `--copy`
+ *     override either default.
  *  3. PlayerDebugMode must be 1 for the CSXS runtime Illustrator actually
  *     uses, otherwise CEP refuses anything it cannot verify a signature for.
  *       macOS:   defaults write com.adobe.CSXS.11 PlayerDebugMode 1
@@ -21,7 +25,7 @@
  * the two platforms cannot drift apart.
  *
  * Usage:
- *   node scripts/dev-install.mjs [--uninstall] [--csxs=11,12] [--copy] [--dry-run]
+ *   node scripts/dev-install.mjs [--uninstall] [--csxs=11,12] [--copy|--link] [--dry-run]
  *
  * Env:
  *   WEB2AI_CEP_EXTENSIONS_DIR   override the target directory (used by tests)
@@ -37,6 +41,7 @@ import {
   distDir as sourceDir,
   extensionsDir,
   installTarget,
+  legacyInstallTargets,
   linkKind,
   linkTarget,
   repoRoot,
@@ -46,7 +51,12 @@ import {
 const args = process.argv.slice(2);
 const flags = {
   uninstall: args.includes("--uninstall"),
-  copy: args.includes("--copy"),
+  // Windows installs a real copy by default. CEP's scanner does not reliably
+  // follow reparse points there, and dragging a plain folder into the
+  // extensions directory is the method that demonstrably works — so that is
+  // what the installer imitates. `--link` opts back into the symlink, which is
+  // the nicer development loop when it works. macOS keeps the link.
+  copy: args.includes("--copy") || (platform() === "win32" && !args.includes("--link")),
   dryRun: args.includes("--dry-run"),
   csxs: readCsxsVersions(args),
 };
@@ -167,6 +177,19 @@ function install() {
   const dir = extensionsDir();
   const target = installTarget();
 
+  // An install left behind under an older folder name would sit in the
+  // extensions directory declaring the same bundle id as the new one, which
+  // is a good way to confuse CEP and an even better way to confuse a person
+  // reading the folder listing.
+  for (const legacy of legacyInstallTargets()) {
+    if (flags.dryRun) {
+      log(`would remove stale install at ${legacy}`);
+      continue;
+    }
+    rmSync(legacy, { recursive: true, force: true });
+    log(`removed stale install at ${legacy}`);
+  }
+
   if (flags.dryRun) {
     log(`would install ${sourceDir} -> ${target}`);
   } else {
@@ -220,6 +243,10 @@ function install() {
 }
 
 function uninstall() {
+  for (const legacy of legacyInstallTargets()) {
+    if (!flags.dryRun) rmSync(legacy, { recursive: true, force: true });
+    log(`removed ${legacy}`);
+  }
   const target = installTarget();
   const removed = removeTarget(target);
   log(removed ? `removed ${target}` : `nothing installed at ${target}`);

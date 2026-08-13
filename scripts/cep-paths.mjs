@@ -13,7 +13,24 @@ import { fileURLToPath } from "node:url";
 
 export const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 export const distDir = join(repoRoot, "apps", "cep-extension", "dist");
+
+/** The manifest's ExtensionBundleId. Identifies the extension to CEP. */
 export const BUNDLE_ID = "com.web2ai.cep";
+
+/**
+ * The folder name under the CEP extensions directory.
+ *
+ * This is *not* the bundle id, and the difference matters. The folder name is
+ * free-form — CEP reads the identity out of CSXS/manifest.xml, not out of the
+ * directory — but a reverse-DNS folder name is not what panels in the wild
+ * use, and on at least one machine a `com.x.y`-style folder was skipped while
+ * every plainly-named neighbour loaded. A simple name costs nothing and
+ * removes a variable, so that is what gets installed.
+ */
+export const INSTALL_FOLDER = "web2ai";
+
+/** Folder names earlier versions installed to; removed on install. */
+export const LEGACY_INSTALL_FOLDERS = ["com.web2ai.cep"];
 
 /** CSXS runtimes worth touching: 11 is what we target, 12 is what newer Illustrator ships. */
 export const CSXS_VERSIONS = ["11", "12"];
@@ -42,7 +59,15 @@ export function extensionsDir() {
 }
 
 export function installTarget() {
-  return join(extensionsDir(), BUNDLE_ID);
+  return join(extensionsDir(), INSTALL_FOLDER);
+}
+
+/** Existing installs left behind by earlier folder-naming schemes. */
+export function legacyInstallTargets() {
+  const dir = extensionsDir();
+  return LEGACY_INSTALL_FOLDERS.map((name) => join(dir, name)).filter(
+    (path) => linkKind(path) !== "missing",
+  );
 }
 
 /** "symlink" | "junction-or-directory" | "missing". Windows junctions report as directories. */

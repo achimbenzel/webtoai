@@ -44,7 +44,10 @@ export default defineConfig({
     target: "chrome88",
     modulePreload: false,
     cssCodeSplit: false,
-    sourcemap: true,
+    // No .map file: it is one more artefact in a folder CEP scans, and the
+    // panels that load in the wild ship without one. The panel bundle is small
+    // and unminified, so a stack trace is readable as it is.
+    sourcemap: false,
     rollupOptions: {
       output: {
         format: "iife",

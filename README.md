@@ -38,15 +38,9 @@ pnpm build
 pnpm dev:install
 ```
 
-On Windows, install a copy rather than a link — CEP's scanner does not reliably
-follow reparse points:
-
-```bash
-pnpm dev:install --copy
-```
-
-This places `apps/cep-extension/dist` in your per-user CEP extensions directory
-and enables `PlayerDebugMode` so Illustrator will load an unsigned panel:
+This installs the built panel into your per-user CEP extensions directory as a
+folder named `web2ai`, and enables `PlayerDebugMode` so Illustrator will load an
+unsigned panel:
 
 |         |                                                                                                              |
 | ------- | ------------------------------------------------------------------------------------------------------------ |
@@ -110,6 +104,10 @@ The three usual causes, in order of how often they bite:
 6. **Non-ASCII in the ExtendScript host.** ExtendScript reads `.jsx` as ASCII
    unless told otherwise; one mis-decoded byte takes the whole bundle down.
    The build refuses to emit a non-ASCII host bundle, and a test enforces it.
+7. **The folder name.** CEP reads the extension's identity from the manifest,
+   so the folder name is free-form — and therefore easy to get wrong with no
+   symptom. web2ai installs to a plain `web2ai`; on Windows a copy, not a link,
+   which is what dragging a folder in by hand does.
 
 `docs/ARCHITECTURE.md` has the full table of these constraints and what each
 one costs.

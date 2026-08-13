@@ -15,13 +15,14 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { platform } from "node:os";
 import { join } from "node:path";
 import {
-  BUNDLE_ID,
+  INSTALL_FOLDER,
   CSXS_VERSIONS_PROBED,
   compareVersions,
   distDir,
   extensionsDir,
   installTarget,
   hostRangeAccepts,
+  legacyInstallTargets,
   linkKind,
   linkTarget,
   readManifest,
@@ -114,18 +115,26 @@ function checkInstall() {
   }
   line("info", `extensions folder: ${dir}`);
 
+  for (const legacy of legacyInstallTargets()) {
+    line(
+      "warn",
+      `a stale install is still present at ${legacy}`,
+      "Two folders declaring the same bundle id. Run: pnpm dev:install",
+    );
+  }
+
   const target = installTarget();
   const kind = linkKind(target);
 
   if (kind === "missing") {
-    line("fail", `${BUNDLE_ID} is not installed`, "Run: pnpm dev:install");
+    line("fail", `${INSTALL_FOLDER} is not installed`, "Run: pnpm dev:install");
     return;
   }
 
   if (kind === "symlink") {
     line(
       "warn",
-      `${BUNDLE_ID} is a symlink -> ${linkTarget(target) ?? "?"}`,
+      `${INSTALL_FOLDER} is a symlink -> ${linkTarget(target) ?? "?"}`,
       platform() === "win32"
         ? "CEP's scanner does not reliably follow reparse points on Windows. " +
             "If the panel is still missing, reinstall with: pnpm dev:install --copy"
@@ -134,8 +143,8 @@ function checkInstall() {
   } else if (kind === "directory") {
     // A Windows junction is indistinguishable from a real directory via lstat,
     // so compare against the build folder to tell them apart.
-    const looksLinked = !existsSync(join(target, "..", `${BUNDLE_ID}.real`));
-    line("info", `${BUNDLE_ID} is a directory${looksLinked ? " (or a junction)" : ""}`);
+    const looksLinked = !existsSync(join(target, "..", `${INSTALL_FOLDER}.real`));
+    line("info", `${INSTALL_FOLDER} is a directory${looksLinked ? " (or a junction)" : ""}`);
     if (platform() === "win32") {
       line(
         "info",
@@ -179,7 +188,9 @@ function checkInstall() {
  * the difference between their manifest and ours is the answer.
  */
 function compareWithNeighbours(dir) {
-  const neighbours = readdirSync(dir).filter((name) => name !== BUNDLE_ID && !name.startsWith("."));
+  const neighbours = readdirSync(dir).filter(
+    (name) => name !== INSTALL_FOLDER && !name.startsWith("."),
+  );
   if (neighbours.length === 0) return;
 
   const ours = readManifest(distDir);
@@ -256,6 +267,18 @@ function compareWithNeighbours(dir) {
       "If the checks above all pass, install a real copy: pnpm dev:install --copy",
     );
   }
+
+  // The folder name is free-form, so it is easy to overlook — and easy to get
+  // wrong in a way nothing else reveals. If every extension that loads uses a
+  // plain name and ours does not, say so.
+  const dotted = rows.filter((row) => row.name.includes("."));
+  if (dotted.length === 0 && INSTALL_FOLDER.includes(".")) {
+    line(
+      "warn",
+      `our folder is "${INSTALL_FOLDER}", but no extension that loads here has a dot in its name`,
+      "Rename the installed folder to something plain and restart Illustrator.",
+    );
+  }
 }
 
 // ── 2c. Diff against a manifest known to work ───────────────────────────────
@@ -325,13 +348,76 @@ function checkReference(referencePath) {
 
   if (differences === 0) {
     line("ok", "the two manifests agree on every field that affects loading");
-    line("info", "the cause is outside the manifest — see the remaining steps below");
   } else {
     line(
       "info",
-      `${differences} field(s) differ; each one is a candidate. RequiredRuntime and ` +
-        "CEFCommandLine are the two that most often decide it.",
+      `${differences} manifest field(s) differ; each one is a candidate. RequiredRuntime ` +
+        "and CEFCommandLine are the two that most often decide it.",
     );
+  }
+
+  compareStructure(root);
+}
+
+/**
+ * Compares the file tree and encodings, not just the manifest.
+ *
+ * A field-by-field manifest diff misses everything that is not a field: the
+ * folder name, the file layout, text encodings, line endings. Those are
+ * exactly the things that are invisible when reading the XML and decisive
+ * when CEP scans the directory.
+ */
+function compareStructure(root) {
+  const list = (base) => {
+    const out = [];
+    const walk = (dir, prefix) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const rel = prefix === "" ? entry.name : `${prefix}/${entry.name}`;
+        if (entry.isDirectory()) walk(join(dir, entry.name), rel);
+        else out.push(rel);
+      }
+    };
+    walk(base, "");
+    return out.sort();
+  };
+
+  const theirs = list(root);
+  const ours = list(distDir);
+
+  const onlyOurs = ours.filter((name) => !theirs.includes(name));
+  const onlyTheirs = theirs.filter((name) => !ours.includes(name));
+
+  line("info", `file tree: ours ${ours.length} file(s), reference ${theirs.length}`);
+  if (onlyOurs.length > 0) line("info", `only in ours:      ${onlyOurs.join(", ")}`);
+  if (onlyTheirs.length > 0) line("info", `only in reference: ${onlyTheirs.join(", ")}`);
+
+  // Folder name — free-form, therefore easy to get wrong silently.
+  const referenceFolder = root.split(/[\\/]/).filter(Boolean).pop() ?? "?";
+  if (referenceFolder.includes(".") === INSTALL_FOLDER.includes(".")) {
+    line("ok", `folder name shape matches (ours "${INSTALL_FOLDER}", theirs "${referenceFolder}")`);
+  } else {
+    line(
+      "warn",
+      `folder name shape differs: ours "${INSTALL_FOLDER}", theirs "${referenceFolder}"`,
+      "CEP takes the extension's identity from the manifest, not the folder, but a " +
+        "reverse-DNS folder name is not what working panels use.",
+    );
+  }
+
+  // Encodings and line endings, for the files both sides have.
+  for (const name of ours.filter((file) => theirs.includes(file))) {
+    const mine = readFileSync(join(distDir, name));
+    const theirsBytes = readFileSync(join(root, name));
+    const nonAscii = (buffer) => buffer.some((byte) => byte > 127);
+    if (nonAscii(mine) && !nonAscii(theirsBytes)) {
+      line(
+        "warn",
+        `${name}: ours is non-ASCII, the reference is pure ASCII`,
+        name.endsWith(".jsx")
+          ? "ExtendScript reads .jsx as ASCII unless told otherwise."
+          : undefined,
+      );
+    }
   }
 }
 

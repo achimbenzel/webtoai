@@ -102,7 +102,7 @@ export function evalScriptRaw(source: string): Promise<string> {
 /**
  * Calls `web2ai.<fn>(...)` in the host and unwraps the JSON envelope.
  *
- * Arguments must be primitives — strings, numbers, booleans. Anything larger
+ * Arguments must be primitives -- strings, numbers, booleans. Anything larger
  * belongs in a temp file whose path is passed as a string.
  */
 export async function callHost<T>(
@@ -117,7 +117,7 @@ export async function callHost<T>(
   if (raw === "EvalScript error.") {
     throw new Error(
       `Host call web2ai.${fn}() failed to evaluate. The host bundle most likely contains ` +
-        `non-ES3 syntax — check dist/host/index.jsx.`,
+        `non-ES3 syntax -- check dist/host/index.jsx.`,
     );
   }
   if (raw === "undefined" || raw === "") {
@@ -168,7 +168,7 @@ export function systemPath(type: SystemPathType): string {
   const raw = cep.getSystemPath(type);
   if (!raw.startsWith("file://")) return raw;
   const decoded = decodeURIComponent(raw.slice("file://".length));
-  // Windows paths come back as /C:/Users/... — strip the leading slash.
+  // Windows paths come back as /C:/Users/... -- strip the leading slash.
   return /^\/[A-Za-z]:/.test(decoded) ? decoded.slice(1) : decoded;
 }
 

@@ -46,7 +46,7 @@ async function refreshHost(): Promise<void> {
   if (!isCepAvailable()) {
     setLead(
       greeting,
-      "Running outside Illustrator — CEP APIs unavailable. Open the panel via Window > Extensions > web2ai.",
+      "Running outside Illustrator -- CEP APIs unavailable. Open the panel via Window > Extensions > web2ai.",
       "warn",
     );
     renderKeyValues(info, [["CEP", "not detected"]]);
@@ -60,7 +60,7 @@ async function refreshHost(): Promise<void> {
     renderKeyValues(info, [
       ["Host bundle", `v${hello.version} (ui-scene@${hello.schemaVersion})`],
       ["CEP API", cepApiVersion()],
-      ["ExtendScript", `${hello.engine} · ${hello.locale}`],
+      ["ExtendScript", `${hello.engine} / ${hello.locale}`],
       ["json2.js", hello.jsonAvailable ? "loaded" : "MISSING"],
       [
         "Config",
