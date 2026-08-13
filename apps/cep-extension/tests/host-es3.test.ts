@@ -1,16 +1,28 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse } from "acorn";
 import { describe, expect, it } from "vitest";
+// @ts-expect-error — plain-JS build tooling, shared with scripts/build.mjs.
+import { checkExtendScriptSource, hasUnescapedSlashInCharClass } from "../scripts/es3-checks.mjs";
 
 /**
- * The single most expensive mistake in this project is shipping an ES5+ token
- * in the ExtendScript host: ExtendScript's parser gives up on the *whole*
- * bundle and `evalScript` answers with the string "EvalScript error." and
- * nothing else. Parsing every host source at `ecmaVersion: 3` turns that
- * silent, hard-to-locate runtime failure into a named test failure.
+ * The single most expensive class of mistake in this project is shipping
+ * something ExtendScript's parser rejects. It gives up on the *whole* bundle,
+ * `web2ai` is never defined, and every panel call answers "web2ai is
+ * undefined" — with no file, no line, and nothing pointing at the cause.
+ *
+ * `scripts/es3-checks.mjs` holds the actual rules and is shared with the build,
+ * so a source that passes here cannot fail there.
  */
+
+interface Problem {
+  line: number;
+  message: string;
+  label: string;
+}
+
+const check = checkExtendScriptSource as (source: string, label?: string) => Problem[];
+const slashInClass = hasUnescapedSlashInCharClass as (literal: string) => boolean;
 
 const hostDir = fileURLToPath(new URL("../host", import.meta.url));
 
@@ -20,49 +32,42 @@ function hostSources(): string[] {
     .sort();
 }
 
-describe("ExtendScript host is ES3", () => {
+function describeProblems(problems: Problem[]): string {
+  return problems.map((p) => `${p.label}:${p.line} ${p.message}`).join("\n");
+}
+
+describe("ExtendScript host sources", () => {
   it("has host sources to check", () => {
     expect(hostSources().length).toBeGreaterThan(0);
   });
 
-  it.each(hostSources())("%s parses as ES3", (name) => {
-    const source = readFileSync(join(hostDir, name), "utf8");
-    expect(() => parse(source, { ecmaVersion: 3, sourceType: "script" })).not.toThrow();
+  it.each(hostSources())("%s is valid ExtendScript", (name) => {
+    const problems = check(readFileSync(join(hostDir, name), "utf8"), name);
+    expect(problems, describeProblems(problems)).toEqual([]);
   });
 
-  it("json2.js parses as ES3", () => {
-    const source = readFileSync(join(hostDir, "lib", "json2.js"), "utf8");
-    expect(() => parse(source, { ecmaVersion: 3, sourceType: "script" })).not.toThrow();
+  it("json2.js is valid ExtendScript", () => {
+    const problems = check(readFileSync(join(hostDir, "lib", "json2.js"), "utf8"), "json2.js");
+    expect(problems, describeProblems(problems)).toEqual([]);
   });
 
-  it("the concatenated bundle parses as ES3", () => {
-    // Checking the sources one by one is not the same as checking what ships:
-    // concatenation is where a file that does not end cleanly can run into the
-    // next one. This asserts the artefact, assembled exactly as the build does.
+  it("the concatenated bundle is valid ExtendScript", () => {
+    // Checking the sources one by one is not the same as checking what ships.
+    // The bundle is the artefact Illustrator parses, so the bundle is asserted.
     const bundle = [
       readFileSync(join(hostDir, "lib", "json2.js"), "utf8"),
       ...hostSources().map((name) => readFileSync(join(hostDir, name), "utf8")),
     ].join("\n\n");
 
-    expect(() => parse(bundle, { ecmaVersion: 3, sourceType: "script" })).not.toThrow();
-    // The namespace has to survive concatenation, or every host call answers
-    // "web2ai is undefined" with nothing to say about why.
+    const problems = check(bundle, "bundle");
+    expect(problems, describeProblems(problems)).toEqual([]);
     expect(bundle).toContain("web2ai.hello =");
     expect(bundle).toContain("web2ai.openScene =");
   });
 
-  it.each(hostSources())("%s is pure ASCII", (name) => {
-    // ExtendScript reads .jsx as ASCII unless told otherwise. A stray em dash
-    // in a comment is enough to mis-decode, and a single decode error takes
-    // the whole bundle down — the same failure mode as an ES5 token.
-    const source = readFileSync(join(hostDir, name), "utf8");
-    const offenders = [...source].filter((char) => char.charCodeAt(0) > 127);
-    expect(offenders, `non-ASCII characters: ${[...new Set(offenders)].join(" ")}`).toEqual([]);
-  });
-
-  it("contains no ES5+ constructs that acorn's ES3 mode still accepts", () => {
-    // acorn's ES3 mode catches syntax, not library surface. These are the
-    // built-ins ExtendScript lacks; grep for them explicitly.
+  it("uses no library methods ExtendScript lacks", () => {
+    // acorn validates syntax, not the standard library. These exist in ES5 and
+    // not in ExtendScript, so they fail at runtime rather than at parse time.
     const banned: ReadonlyArray<[RegExp, string]> = [
       [/\.forEach\s*\(/, "Array.prototype.forEach"],
       [/\.map\s*\(\s*function/, "Array.prototype.map"],
@@ -89,5 +94,43 @@ describe("ExtendScript host is ES3", () => {
         }
       });
     }
+  });
+});
+
+describe("the ExtendScript checker itself", () => {
+  it("catches an unescaped slash inside a character class", () => {
+    // This exact literal took down the whole host bundle, and acorn's ES3 mode
+    // accepts it happily: ExtendScript ends the regex at the inner slash and
+    // then reports "Expected: )" on a line that looks perfectly fine.
+    expect(slashInClass(String.raw`/[\\/]+$/`)).toBe(true);
+    const problems = check(String.raw`var x = "a".replace(/[\\/]+$/, "");`);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain("unescaped");
+  });
+
+  it("accepts the escaped form", () => {
+    expect(slashInClass(String.raw`/[\\\/]+$/`)).toBe(false);
+    expect(check(String.raw`var x = "a".replace(/[\\\/]+$/, "");`)).toEqual([]);
+  });
+
+  it("does not mistake a closing delimiter for the bug", () => {
+    expect(slashInClass(String.raw`/^abc$/`)).toBe(false);
+    expect(slashInClass(String.raw`/a\/b/`)).toBe(false);
+    expect(slashInClass(String.raw`/[abc]/g`)).toBe(false);
+  });
+
+  it("catches reserved words used as property names", () => {
+    // ES5 legalised these; ES3 and ExtendScript did not.
+    expect(check(`var o = {}; o.default = 1;`)).toHaveLength(1);
+    expect(check(`var o = { class: 1 };`)).toHaveLength(1);
+    expect(check(`var o = {}; o.delete = 1;`)).toHaveLength(1);
+    expect(check(`var o = { "class": 1 };`)).toEqual([]);
+    expect(check(`var o = {}; o["default"] = 1;`)).toEqual([]);
+  });
+
+  it("catches non-ASCII and non-ES3 syntax", () => {
+    expect(check(`var s = "—";`)).toHaveLength(1);
+    expect(check(`const x = 1;`)[0]?.message).toContain("not valid ES3");
+    expect(check(`var o = { a: 1, };`)[0]?.message).toContain("not valid ES3");
   });
 });

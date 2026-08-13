@@ -184,9 +184,20 @@ for once and is written down so it is not paid for twice:
 | `MainPath`/`ScriptPath` must resolve        | A build that failed partway leaves a folder that looks perfectly normal and is silently ignored. `dev:install` refuses to install one.                                                                                                                                                        |
 | Windows: install a copy, not a link         | CEP's scanner does not reliably follow reparse points. `dev:install --copy`.                                                                                                                                                                                                                  |
 
-`pnpm dev:doctor` checks all of these, and `--reference <folder>` diffs our
-manifest field by field against any extension that Illustrator does list —
-which is the fastest way to find whichever one is biting today.
+`pnpm dev:doctor` checks the installation-side constraints, and
+`--reference <folder>` diffs our manifest field by field against any extension
+that Illustrator does list.
+
+The source-side ones live in `apps/cep-extension/scripts/es3-checks.mjs`, which
+the build and the tests share — so a host source that passes the test suite
+cannot fail the build. It exists because acorn at `ecmaVersion: 3` is necessary
+but not sufficient: the two rows above are cases acorn accepts and ExtendScript
+rejects. The build checks the _assembled bundle_, not the sources one at a time,
+because the bundle is what Illustrator parses.
+
+The panel also loads the host itself with `$.evalFile` rather than trusting the
+manifest's `ScriptPath`. That is what turns a parse failure from "web2ai is
+undefined" into a real message with a line number.
 
 ## Testing strategy
 

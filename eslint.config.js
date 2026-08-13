@@ -63,7 +63,13 @@ export default tseslint.config(
       "no-var": "off",
       "prefer-const": "off",
       "no-undef": "error",
-      "no-unused-vars": ["warn", { args: "none" }],
+      "no-unused-vars": ["warn", { args: "none", caughtErrors: "none" }],
+      // ExtendScript ends a regex literal at the first unescaped "/", even
+      // inside a character class, so `/[\\\/]+$/` needs an escape that modern
+      // JavaScript considers useless. Obeying this rule here produced a syntax
+      // error that took down the entire host bundle.
+      // apps/cep-extension/scripts/es3-checks.mjs enforces the opposite.
+      "no-useless-escape": "off",
     },
   },
   {

@@ -39,6 +39,7 @@ import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } f
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
+import { checkExtendScriptSource, formatProblems } from "./es3-checks.mjs";
 
 const appDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const repoRoot = dirname(dirname(appDir));
@@ -76,22 +77,21 @@ function buildHostBundle() {
 
   const bundle = parts.join("");
 
-  // ExtendScript reads .jsx as ASCII unless told otherwise, and mis-decodes a
-  // UTF-8 byte sequence it was not expecting — which, in a language where one
-  // parse error kills the whole file, is not a risk worth carrying for the
-  // sake of a typographic dash in a comment.
-  const nonAscii = [...bundle].filter((char) => char.charCodeAt(0) > 127);
-  if (nonAscii.length > 0) {
-    const sample = [...new Set(nonAscii)].slice(0, 8).join(" ");
+  // The bundle is the artefact that has to parse, so the bundle is what gets
+  // checked -- not the sources one at a time. A failure here is silent inside
+  // Illustrator: the namespace is simply never defined, and every panel call
+  // answers "web2ai is undefined" with nothing about the cause.
+  const problems = checkExtendScriptSource(bundle, "jsx/host.jsx");
+  if (problems.length > 0) {
     throw new Error(
-      `Host bundle contains ${nonAscii.length} non-ASCII character(s): ${sample}\n` +
-        `ExtendScript sources must stay in the ASCII range.`,
+      `Host bundle is not valid ExtendScript:\n${formatProblems(problems)}\n\n` +
+        `Illustrator would report these only as an undefined namespace, so the build stops here.`,
     );
   }
 
   mkdirSync(join(distDir, "jsx"), { recursive: true });
   writeFileSync(join(distDir, "jsx", "host.jsx"), bundle, "ascii");
-  log(`host bundle: ${sources.length} source(s) + json2.js -> jsx/host.jsx (ASCII)`);
+  log(`host bundle: ${sources.length} source(s) + json2.js -> jsx/host.jsx (ES3, ASCII)`);
 }
 
 function extensionId(manifest) {

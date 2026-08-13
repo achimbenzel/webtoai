@@ -89,7 +89,11 @@ web2ai._extensionRoot = "";
  */
 web2ai.setExtensionRoot = function (path) {
   if (path && String(path).length > 0) {
-    web2ai._extensionRoot = String(path).replace(/[\\/]+$/, "");
+    // The backslash before "/" looks redundant and ESLint flags it as such,
+    // but ExtendScript ends a regex literal at the first unescaped slash even
+    // inside a character class -- without it this line is a syntax error that
+    // takes down the whole bundle.
+    web2ai._extensionRoot = String(path).replace(/[\\\/]+$/, "");
     // A different extension root invalidates anything cached from the old one.
     web2ai._config = null;
     web2ai._fontMap = null;

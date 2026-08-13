@@ -45,6 +45,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schema
     devDependencies:
+      acorn:
+        specifier: ^8.18.0
+        version: 8.18.0
       vite:
         specifier: ^7.1.12
         version: 7.3.6(@types/node@22.20.1)
