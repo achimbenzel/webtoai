@@ -39,7 +39,7 @@ export interface FakePathPoint {
 
 /** Anything that can sit inside a layer or a group. */
 export interface FakeItem {
-  kind: "path" | "text" | "placed" | "group";
+  kind: "path" | "text" | "placed" | "group" | "imported";
   name: string;
   top?: number;
   left?: number;
@@ -92,21 +92,74 @@ interface Sandbox {
   [key: string]: unknown;
 }
 
-/** Items and sublayers are inserted at index 0, exactly as Illustrator does. */
-function makeContainer(name: string): Record<string, unknown> {
-  const items: FakeItem[] = [];
-  const layers: Record<string, unknown>[] = [];
+/** The mutable sandbox view of a container; `__items` is the live array. */
+type SandboxContainer = Record<string, unknown>;
 
-  const container: Record<string, unknown> = {
+const ELEMENT_PLACEMENT = {
+  PLACEATBEGINNING: "beginning",
+  PLACEATEND: "end",
+  PLACEBEFORE: "before",
+  PLACEAFTER: "after",
+  INSIDE: "inside",
+} as const;
+
+/** Removes an item from whatever container currently holds it. */
+function detach(item: FakeItem): void {
+  const from = (item as FakeItem & { __container?: SandboxContainer }).__container;
+  if (from === undefined) return;
+  const siblings = from["__items"] as FakeItem[];
+  const index = siblings.indexOf(item);
+  if (index !== -1) siblings.splice(index, 1);
+}
+
+/**
+ * Gives an item the bits of the PageItem API the builder uses to reparent
+ * things: `parent` and `move`. Illustrator's clipping groups are built by
+ * moving an existing item into a new group, so this is not optional detail.
+ */
+function attachItemApi(item: FakeItem, container: SandboxContainer): FakeItem {
+  const self = item as FakeItem & {
+    __container: SandboxContainer;
+    parent: SandboxContainer;
+    move(target: SandboxContainer, placement: string): void;
+  };
+  self.__container = container;
+  // Illustrator's `parent` is the Layer or GroupItem, both of which are
+  // containers you can add to — `item.parent.groupItems.add()` is how the
+  // builder wraps something in a clipping group.
+  Object.defineProperty(self, "parent", {
+    get: () => self.__container,
+    configurable: true,
+  });
+  self.move = (target, placement) => {
+    if (target === undefined || target["__items"] === undefined) {
+      throw new Error("move: target is not a container");
+    }
+    detach(item);
+    const siblings = target["__items"] as FakeItem[];
+    if (placement === ELEMENT_PLACEMENT.PLACEATEND) siblings.push(item);
+    else siblings.unshift(item);
+    self.__container = target;
+  };
+  return item;
+}
+
+/** Items and sublayers are inserted at index 0, exactly as Illustrator does. */
+function makeContainer(name: string, files: Record<string, string> = {}): SandboxContainer {
+  const items: FakeItem[] = [];
+  const layers: SandboxContainer[] = [];
+
+  const container: SandboxContainer = {
     name,
     __items: items,
     __layers: layers,
     clipped: false,
   };
+  container["__self"] = container;
 
   const push = (item: FakeItem): FakeItem => {
     items.unshift(item);
-    return item;
+    return attachItemApi(item, container);
   };
 
   const newItem = (kind: FakeItem["kind"]): FakeItem => {
@@ -171,21 +224,46 @@ function makeContainer(name: string): Record<string, unknown> {
     },
   };
 
+  const addGroup = (kind: FakeItem["kind"]): SandboxContainer => {
+    const group = makeContainer("", files);
+    const item: FakeItem = { ...newItem(kind), children: readContainer(group) };
+    items.unshift(item);
+    attachItemApi(item, container);
+    // A GroupItem is both an item in its parent and a container in its own
+    // right. Illustrator has one object for both; the fake has two, so the
+    // properties the builder sets on a group are forwarded to the item view.
+    group["__item"] = item;
+    linkGroup(group, item);
+    return group;
+  };
+
   container["groupItems"] = {
-    add(): Record<string, unknown> {
-      const group = makeContainer("");
-      const item: FakeItem = { ...newItem("group"), children: readContainer(group) };
-      items.unshift(item);
-      // The group is both an item in its parent and a container in its own
-      // right, so the two views are kept in sync through the same object.
-      group["__item"] = item;
+    add: (): SandboxContainer => addGroup("group"),
+    /**
+     * Imports vector art. The real call parses the file; the fake reads the
+     * SVG's declared size so that object-fit has an intrinsic ratio to work
+     * with, which is the whole point of the code under test.
+     */
+    createFromFile(file: { fsName: string }): SandboxContainer {
+      const path = String(file?.fsName ?? "");
+      const source = files[path];
+      if (source === undefined) throw new Error(`createFromFile: no such file: ${path}`);
+      if (!/\.svg$/i.test(path)) throw new Error(`createFromFile: not vector art: ${path}`);
+
+      const group = addGroup("imported");
+      const item = group["__item"] as FakeItem;
+      item.file = path;
+      const width = /\bwidth="([\d.]+)"/.exec(source);
+      const height = /\bheight="([\d.]+)"/.exec(source);
+      item.width = width === null ? 0 : Number(width[1]);
+      item.height = height === null ? 0 : Number(height[1]);
       return group;
     },
   };
 
   container["layers"] = {
-    add(): Record<string, unknown> {
-      const layer = makeContainer("");
+    add(): SandboxContainer {
+      const layer = makeContainer("", files);
       layers.unshift(layer);
       return layer;
     },
@@ -195,6 +273,38 @@ function makeContainer(name: string): Record<string, unknown> {
   };
 
   return container;
+}
+
+/** Properties the builder sets on a group, forwarded to its item view. */
+function linkGroup(group: SandboxContainer, item: FakeItem): void {
+  const forwarded = [
+    "name",
+    "clipped",
+    "opacity",
+    "blendingMode",
+    "width",
+    "height",
+    "top",
+    "left",
+  ] as const;
+  for (const key of forwarded) {
+    Object.defineProperty(group, key, {
+      get: () => (item as unknown as Record<string, unknown>)[key],
+      set: (value: unknown) => {
+        (item as unknown as Record<string, unknown>)[key] = value;
+      },
+      enumerable: true,
+      configurable: true,
+    });
+  }
+  Object.defineProperty(group, "parent", {
+    get: () => (item as unknown as { parent: SandboxContainer }).parent,
+    configurable: true,
+  });
+  Object.defineProperty(group, "move", {
+    get: () => (item as unknown as { move: unknown }).move,
+    configurable: true,
+  });
 }
 
 function decorateText(frame: FakeItem): FakeItem {
@@ -232,6 +342,41 @@ function readContainer(container: Record<string, unknown>): FakeContainer {
     },
   } as FakeContainer;
 }
+
+export interface FakeFont {
+  name: string;
+  family: string;
+  style: string;
+}
+
+/**
+ * A plausible set of installed fonts.
+ *
+ * Deliberately includes a family with the full weight ladder (Inter), one with
+ * only two cuts (Arial), and one whose family name has a space and a condensed
+ * sibling (Helvetica Neue) — the three shapes that break a naive matcher.
+ */
+export const INSTALLED_FONTS: FakeFont[] = [
+  { name: "ArialMT", family: "Arial", style: "Regular" },
+  { name: "Arial-BoldMT", family: "Arial", style: "Bold" },
+  { name: "Arial-ItalicMT", family: "Arial", style: "Italic" },
+  { name: "Arial-BoldItalicMT", family: "Arial", style: "Bold Italic" },
+  { name: "MyriadPro-Regular", family: "Myriad Pro", style: "Regular" },
+  { name: "Inter-Thin", family: "Inter", style: "Thin" },
+  { name: "Inter-ExtraLight", family: "Inter", style: "ExtraLight" },
+  { name: "Inter-Light", family: "Inter", style: "Light" },
+  { name: "Inter-Regular", family: "Inter", style: "Regular" },
+  { name: "Inter-Medium", family: "Inter", style: "Medium" },
+  { name: "Inter-SemiBold", family: "Inter", style: "SemiBold" },
+  { name: "Inter-Bold", family: "Inter", style: "Bold" },
+  { name: "Inter-ExtraBold", family: "Inter", style: "ExtraBold" },
+  { name: "Inter-Black", family: "Inter", style: "Black" },
+  { name: "Inter-MediumItalic", family: "Inter", style: "Medium Italic" },
+  { name: "Inter-BoldItalic", family: "Inter", style: "Bold Italic" },
+  { name: "HelveticaNeue", family: "Helvetica Neue", style: "Regular" },
+  { name: "HelveticaNeue-Bold", family: "Helvetica Neue", style: "Bold" },
+  { name: "HelveticaNeue-CondensedBold", family: "Helvetica Neue", style: "Condensed Bold" },
+];
 
 export interface FakeIllustrator {
   sandbox: Sandbox;
@@ -313,6 +458,7 @@ export function createIllustratorSandbox(files: Record<string, string>): FakeIll
     GradientType: { LINEAR: "linear", RADIAL: "radial" },
     Justification: { LEFT: "left", RIGHT: "right", CENTER: "center", FULLJUSTIFY: "justify" },
     StrokeCap: { ROUNDENDCAP: "round", BUTTENDCAP: "butt" },
+    ElementPlacement: ELEMENT_PLACEMENT,
     BlendModes: {
       NORMAL: "normal",
       MULTIPLY: "multiply",
@@ -336,16 +482,16 @@ export function createIllustratorSandbox(files: Record<string, string>): FakeIll
       name: "Adobe Illustrator",
       version: "29.6.1",
       userInteractionLevel: "all",
-      textFonts: Object.assign([] as unknown[], {
+      textFonts: Object.assign(INSTALLED_FONTS.slice(), {
         getByName(name: string) {
-          const known = ["ArialMT", "Arial-BoldMT", "MyriadPro-Regular"];
-          if (!known.includes(name)) throw new Error(`font not found: ${name}`);
-          return { name, family: name.split("-")[0], style: name.includes("Bold") ? "Bold" : "" };
+          const font = INSTALLED_FONTS.find((candidate) => candidate.name === name);
+          if (font === undefined) throw new Error(`font not found: ${name}`);
+          return font;
         },
       }),
       documents: {
         add(colorSpace: string, width: number, height: number): Record<string, unknown> {
-          const root = makeContainer("Layer 1");
+          const root = makeContainer("Layer 1", files);
           const doc: Record<string, unknown> = {
             name: `Untitled-${gradients.length + 1}`,
             width,

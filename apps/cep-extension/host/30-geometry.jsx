@@ -272,3 +272,74 @@ web2ai.shadowOffsets = function (shadow, scale) {
     blur: Math.max((shadow.blur || 0) * k, 0)
   };
 };
+
+/**
+ * Fits an image of a known intrinsic size into a box, the way CSS object-fit
+ * does.
+ *
+ * The renderer used to set width and height to the element box unconditionally,
+ * which is `object-fit: fill` -- correct only when the box already matches the
+ * image's aspect ratio. Anything the page was cropping came out stretched.
+ *
+ * `contain` and `cover` both preserve the aspect ratio; they differ in which
+ * axis is allowed to overflow. `cover` deliberately returns a rectangle LARGER
+ * than the box on one axis: the caller is expected to clip it, and the caller
+ * is the only place that knows whether it can.
+ *
+ * @param {Object} box {top, left, width, height} in artboard points
+ * @param {Object} natural {width, height} intrinsic size, any unit
+ * @param {string} fit fill|contain|cover|none|scale-down
+ * @param {Object} position {x, y} fraction of the leftover space, or null
+ * @returns {Object} {top, left, width, height, overflows}
+ */
+web2ai.fitImage = function (box, natural, fit, position) {
+  var px = position && typeof position.x === "number" ? position.x : 0.5;
+  var py = position && typeof position.y === "number" ? position.y : 0.5;
+
+  var nw = natural && natural.width > 0 ? natural.width : 0;
+  var nh = natural && natural.height > 0 ? natural.height : 0;
+  var mode = fit || "fill";
+
+  // Without an intrinsic size there is no aspect ratio to preserve, so every
+  // mode degrades to the box. Saying so is the caller's job, not ours.
+  if (nw <= 0 || nh <= 0 || box.width <= 0 || box.height <= 0) {
+    return {
+      top: box.top,
+      left: box.left,
+      width: box.width,
+      height: box.height,
+      overflows: false
+    };
+  }
+
+  var width;
+  var height;
+
+  if (mode === "none") {
+    width = nw;
+    height = nh;
+  } else if (mode === "fill") {
+    width = box.width;
+    height = box.height;
+  } else {
+    var scaleX = box.width / nw;
+    var scaleY = box.height / nh;
+    var k = mode === "cover" ? Math.max(scaleX, scaleY) : Math.min(scaleX, scaleY);
+    // scale-down is contain, except that it never enlarges.
+    if (mode === "scale-down" && k > 1) {
+      k = 1;
+    }
+    width = nw * k;
+    height = nh * k;
+  }
+
+  // Positioning distributes the leftover space; a negative leftover (the image
+  // is larger than the box) makes the same arithmetic centre the crop.
+  return {
+    top: box.top - (box.height - height) * py,
+    left: box.left + (box.width - width) * px,
+    width: width,
+    height: height,
+    overflows: width > box.width + 0.01 || height > box.height + 0.01
+  };
+};

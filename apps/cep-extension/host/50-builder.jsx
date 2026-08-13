@@ -535,7 +535,16 @@ web2ai.applyRunAttributes = function (target, run, node, ctx) {
 /**
  * Places an image asset.
  *
- * @returns {Object|null} the placed item
+ * Two very different routes, chosen by asset kind:
+ *
+ *  - Raster goes through `placedItems`, which links or embeds a bitmap.
+ *  - SVG goes through `groupItems.createFromFile`, which parses the file and
+ *    produces real Illustrator paths. `placedItems.file` is documented for
+ *    linked *images*; pointing it at an SVG is how the logo went missing.
+ *    Importing the vector art is also what anyone reconstructing a UI wants --
+ *    an editable logo, not a picture of one.
+ *
+ * @returns {Object|null} the placed item or imported group
  */
 web2ai.drawImage = function (node, container, ctx) {
   var extracted = ctx.assets[node.assetId];
@@ -551,6 +560,29 @@ web2ai.drawImage = function (node, container, ctx) {
   }
 
   var box = web2ai.frameToArtboard(node.frame, ctx.scale);
+  var item =
+    extracted.kind === "svg"
+      ? web2ai.importVector(node, container, ctx, extracted)
+      : web2ai.placeRaster(node, container, ctx, extracted);
+
+  if (item === null) {
+    return null;
+  }
+
+  // Cropping wraps the item in a group, so the outermost object -- the one that
+  // carries the name and the opacity -- is not always the one placed above.
+  var outer = web2ai.fitItemToBox(item, node, box, ctx, extracted);
+  outer.name = node.name;
+
+  if (node.paint && typeof node.paint.opacity === "number" && node.paint.opacity < 1) {
+    outer.opacity = node.paint.opacity * 100;
+  }
+
+  return outer;
+};
+
+/** @returns {Object|null} a PlacedItem */
+web2ai.placeRaster = function (node, container, ctx, extracted) {
   var placed;
   try {
     placed = container.placedItems.add();
@@ -564,17 +596,6 @@ web2ai.drawImage = function (node, container, ctx) {
       e.message ? e.message : String(e)
     );
     return null;
-  }
-
-  // Position first, then size: setting width/height moves the item's anchor.
-  placed.width = box.width;
-  placed.height = box.height;
-  placed.top = box.top;
-  placed.left = box.left;
-  placed.name = node.name;
-
-  if (node.paint && typeof node.paint.opacity === "number" && node.paint.opacity < 1) {
-    placed.opacity = node.paint.opacity * 100;
   }
 
   if (ctx.embedImages) {
@@ -592,6 +613,132 @@ web2ai.drawImage = function (node, container, ctx) {
   }
 
   return placed;
+};
+
+/**
+ * Imports an SVG as editable vector art.
+ *
+ * `groupItems.createFromFile` adds the imported group to the *document*, not to
+ * the container it was called on, in some Illustrator versions. It is moved
+ * explicitly rather than trusted either way.
+ *
+ * @returns {Object|null} a GroupItem
+ */
+web2ai.importVector = function (node, container, ctx, extracted) {
+  var group;
+  try {
+    group = container.groupItems.createFromFile(new File(extracted.path));
+  } catch (e) {
+    web2ai.report(
+      ctx,
+      "unsupported",
+      "svg-import-failed",
+      node.name,
+      e.message ? e.message : String(e)
+    );
+    return null;
+  }
+
+  if (!group) {
+    web2ai.report(ctx, "unsupported", "svg-import-failed", node.name, "no group was returned");
+    return null;
+  }
+
+  try {
+    if (group.parent !== container) {
+      group.move(container, ElementPlacement.PLACEATBEGINNING);
+    }
+  } catch (e) {
+    web2ai.report(
+      ctx,
+      "warn",
+      "svg-import-misplaced",
+      node.name,
+      "imported at the document root: " + (e.message ? e.message : String(e))
+    );
+  }
+
+  return group;
+};
+
+/**
+ * Sizes and positions a placed item or imported group inside the node's box,
+ * honouring `object-fit`.
+ *
+ * The intrinsic size comes from the *item*, not from the scene: an SVG's
+ * imported bounds are what actually got drawn, which is not always what the
+ * capture side measured. The scene's recorded size is the fallback for the
+ * case where Illustrator reports nothing usable.
+ *
+ * @returns {Object} the outermost item, which is a clipping group when the
+ *   fitted image overflows its box
+ */
+web2ai.fitItemToBox = function (item, node, box, ctx, extracted) {
+  var natural = { width: 0, height: 0 };
+  try {
+    natural = { width: item.width, height: item.height };
+  } catch (e) {
+    natural = { width: 0, height: 0 };
+  }
+  if (!(natural.width > 0) || !(natural.height > 0)) {
+    natural = { width: extracted.width || 0, height: extracted.height || 0 };
+  }
+
+  var fit = node.objectFit || "fill";
+  var target = web2ai.fitImage(box, natural, fit, node.objectPosition);
+
+  if (fit !== "fill" && !(natural.width > 0 && natural.height > 0)) {
+    web2ai.report(
+      ctx,
+      "warn",
+      "object-fit-no-intrinsic-size",
+      node.name,
+      "object-fit: " + fit + " needs the image's intrinsic size; stretched to the box instead"
+    );
+  }
+
+  // Size first, then position: setting width/height scales about the item's own
+  // anchor, so any left/top set beforehand is thrown away.
+  if (target.width > 0 && target.height > 0) {
+    item.width = target.width;
+    item.height = target.height;
+  }
+  item.top = target.top;
+  item.left = target.left;
+
+  // `cover` and `none` are defined to crop. Without a mask the overflow paints
+  // over the neighbours, which is worse than the distortion this replaced.
+  return target.overflows ? web2ai.clipItemTo(item, node, box, ctx) : item;
+};
+
+/**
+ * Wraps an item in a clipping group the size of the node's box.
+ *
+ * Illustrator clips with the topmost object in a group, so the mask is added
+ * after the item has been moved in.
+ *
+ * @returns {Object} the clipping group, or the item itself if masking failed
+ */
+web2ai.clipItemTo = function (item, node, box, ctx) {
+  try {
+    var group = item.parent.groupItems.add();
+    item.move(group, ElementPlacement.PLACEATEND);
+    var mask = web2ai.createRect(group, box, node, ctx);
+    mask.name = "crop";
+    mask.filled = false;
+    mask.stroked = false;
+    group.clipped = true;
+    return group;
+  } catch (e) {
+    web2ai.report(
+      ctx,
+      "warn",
+      "object-fit-crop-failed",
+      node.name,
+      "the image overflows its box uncropped: " + (e.message ? e.message : String(e))
+    );
+    return item;
+  }
 };
 
 /**

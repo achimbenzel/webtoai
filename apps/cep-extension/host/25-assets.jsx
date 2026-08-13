@@ -134,41 +134,85 @@ web2ai.writeBinaryFile = function (path, binary) {
 };
 
 /**
+ * Whether an asset holds vector art.
+ *
+ * The scene's `kind` is authoritative, but a raster asset whose bytes happen to
+ * be SVG (a `.svg` behind a URL the capture side never sniffed) still has to
+ * take the vector route, or Illustrator is handed an SVG through the raster API
+ * and silently places nothing.
+ *
+ * @param {Object} asset scene Asset
+ * @param {string} mime mime type read from the data: URL, if any
+ * @returns {boolean}
+ */
+web2ai.isVectorAsset = function (asset, mime) {
+  if (asset.kind === "svg") {
+    return true;
+  }
+  var declared = String(mime || asset.mime || "").toLowerCase();
+  return declared.substring(0, 13) === "image/svg+xml";
+};
+
+/**
  * Materialises one scene asset as a file.
  *
  * @param {Object} asset scene Asset
  * @param {string} folder absolute path of the temp folder
- * @returns {Object} {ok, path, reason}
+ * @returns {Object} {ok, path, reason, kind, width, height}
  */
 web2ai.extractAsset = function (asset, folder) {
+  var size = { width: asset.width || 0, height: asset.height || 0 };
+
   if (asset.error) {
-    return { ok: false, path: "", reason: asset.error };
+    return { ok: false, path: "", reason: asset.error, kind: "", width: 0, height: 0 };
   }
 
   // Inline SVG: text, straight to disk.
   if (asset.kind === "svg" && asset.svg) {
     var svgPath = folder + "/" + asset.id + ".svg";
     web2ai.writeTextFile(svgPath, asset.svg);
-    return { ok: true, path: svgPath, reason: "" };
+    return {
+      ok: true,
+      path: svgPath,
+      reason: "",
+      kind: "svg",
+      width: size.width,
+      height: size.height
+    };
   }
 
   if (asset.dataUrl) {
     var parsed = web2ai.parseDataUrl(asset.dataUrl);
     if (parsed === null) {
-      return { ok: false, path: "", reason: "asset-dataurl-unparsable" };
+      return {
+        ok: false,
+        path: "",
+        reason: "asset-dataurl-unparsable",
+        kind: "",
+        width: 0,
+        height: 0
+      };
     }
+    var vector = web2ai.isVectorAsset(asset, parsed.mime);
     var path = folder + "/" + asset.id + web2ai.extensionForMime(parsed.mime || asset.mime);
     if (parsed.base64) {
       web2ai.writeBinaryFile(path, web2ai.base64Decode(parsed.data));
     } else {
       web2ai.writeTextFile(path, decodeURIComponent(parsed.data));
     }
-    return { ok: true, path: path, reason: "" };
+    return {
+      ok: true,
+      path: path,
+      reason: "",
+      kind: vector ? "svg" : "raster",
+      width: size.width,
+      height: size.height
+    };
   }
 
   // No bytes: the capture side could not embed it. The node keeps its frame
   // and the report says why.
-  return { ok: false, path: "", reason: "asset-not-embedded" };
+  return { ok: false, path: "", reason: "asset-not-embedded", kind: "", width: 0, height: 0 };
 };
 
 /**

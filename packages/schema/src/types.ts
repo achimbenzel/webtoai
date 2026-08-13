@@ -166,6 +166,8 @@ export interface Asset {
 
 export type NodeRole = "box" | "text" | "image" | "svg" | "unsupported";
 
+export type ObjectFit = "fill" | "contain" | "cover" | "none" | "scale-down";
+
 export type CssPosition = "static" | "relative" | "absolute" | "fixed" | "sticky";
 
 export interface Frame {
@@ -186,6 +188,18 @@ export interface SceneNode {
   paint: NodePaint;
   text?: TextContent;
   assetId?: string;
+  /**
+   * `object-fit` for image nodes. Without it the renderer stretches every image
+   * to the element box, which visibly distorts anything CSS was cropping.
+   * Extension of the base spec.
+   */
+  objectFit?: ObjectFit;
+  /**
+   * `object-position` as a fraction of the leftover space on each axis, the
+   * same normalisation CSS uses: 0 = flush left/top, 1 = flush right/bottom.
+   * Only meaningful together with `objectFit`. Extension of the base spec.
+   */
+  objectPosition?: { x: number; y: number };
   /** `overflow: hidden|scroll|auto` — the renderer builds a clipping mask. */
   clip: boolean;
   /** 2D affine matrix [a, b, c, d, e, f]; absent when identity. */

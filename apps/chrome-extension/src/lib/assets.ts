@@ -133,10 +133,15 @@ export function buildAssets(
       return { ...asset, dataUrl: request.inline.data };
     }
 
+    // `<img src="logo.svg">` is requested as a raster — the walker only sees an
+    // `<img>`. The URL is the first evidence of what it really is, and the
+    // renderer imports SVG through a different API entirely, so the kind is
+    // corrected here rather than left for the host to sniff.
+    const mime = guessMimeFromUrl(request.url ?? "");
     const base: Asset = {
       id: request.id,
-      kind: request.kind,
-      mime: guessMimeFromUrl(request.url ?? ""),
+      kind: kindForMime(mime),
+      mime,
       width: request.width,
       height: request.height,
     };

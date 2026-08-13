@@ -426,6 +426,58 @@ describe("walker — assets", () => {
     ]);
   });
 
+  it("records object-fit, without which every cropped image is stretched", () => {
+    const { scene } = capture({
+      tag: "div",
+      style: filled,
+      children: [
+        {
+          tag: "img",
+          rect: { width: 200, height: 100 },
+          style: { "object-fit": "cover", "object-position": "50% 0%" },
+          image: { src: "/photo.jpg", width: 400, height: 400 },
+        },
+      ],
+    });
+    const img = findByName(scene.root, "img");
+    expect(img?.objectFit).toBe("cover");
+    expect(img?.objectPosition).toEqual({ x: 0.5, y: 0 });
+  });
+
+  it("omits object-fit when it is the default, since fill is what a box does", () => {
+    const { scene } = capture({
+      tag: "div",
+      style: filled,
+      children: [
+        {
+          tag: "img",
+          style: { "object-fit": "fill", "object-position": "50% 50%" },
+          image: { src: "/photo.jpg", width: 400, height: 400 },
+        },
+      ],
+    });
+    const img = findByName(scene.root, "img");
+    expect(img?.objectFit).toBeUndefined();
+    expect(img?.objectPosition).toBeUndefined();
+  });
+
+  it("omits a centred object-position, which is the default once fit is set", () => {
+    const { scene } = capture({
+      tag: "div",
+      style: filled,
+      children: [
+        {
+          tag: "img",
+          style: { "object-fit": "contain", "object-position": "50% 50%" },
+          image: { src: "/photo.jpg", width: 400, height: 400 },
+        },
+      ],
+    });
+    const img = findByName(scene.root, "img");
+    expect(img?.objectFit).toBe("contain");
+    expect(img?.objectPosition).toBeUndefined();
+  });
+
   it("deduplicates the same image used twice", () => {
     const { assetRequests } = capture({
       tag: "div",

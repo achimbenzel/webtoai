@@ -125,6 +125,8 @@ export const sceneNodeSchema: z.ZodType<SceneNode> = z.lazy(() =>
     paint: nodePaintSchema,
     text: textContentSchema.optional(),
     assetId: z.string().optional(),
+    objectFit: z.enum(["fill", "contain", "cover", "none", "scale-down"]).optional(),
+    objectPosition: z.object({ x: finite, y: finite }).optional(),
     clip: z.boolean(),
     transform: z.array(finite).length(6).optional(),
     transformOrigin: z.object({ x: finite, y: finite }).optional(),

@@ -15,6 +15,7 @@ import type {
 import { AssetCollector, backgroundImageUrls, backgroundLayerCount } from "./assets.ts";
 import { isTransparent, parseColorDetailed } from "./css/color.ts";
 import { isGradient, parseGradient } from "./css/gradient.ts";
+import { parseObjectFit, parseObjectPosition } from "./css/object-fit.ts";
 import { parseBorderRadius } from "./css/radius.ts";
 import { parseBoxShadow } from "./css/shadow.ts";
 import { parseTransform, parseTransformOrigin } from "./css/transform.ts";
@@ -692,6 +693,7 @@ class Walker {
         info.width,
         info.height,
       );
+      this.readObjectFit(style, node, frame, reasons);
       return true;
     }
 
@@ -727,6 +729,7 @@ class Walker {
         frame.w,
         frame.h,
       );
+      this.readObjectFit(style, node, frame, reasons);
       return true;
     }
 
@@ -742,6 +745,27 @@ class Walker {
     }
 
     return false;
+  }
+
+  /**
+   * Records how a replaced element's image is fitted into its box.
+   *
+   * Only recorded when it is not the CSS default: with `fill` the image is
+   * stretched to the box, which is exactly what a renderer does when the field
+   * is absent, so emitting it would be noise. `object-position` only has an
+   * effect once the fitted image differs in size from the box, so it rides
+   * along with the same condition.
+   */
+  private readObjectFit(style: StyleLike, node: SceneNode, frame: Frame, reasons: string[]): void {
+    const fit = parseObjectFit(style.getPropertyValue("object-fit"));
+    if (fit === null || fit === "fill") return;
+
+    node.objectFit = fit;
+    const position = parseObjectPosition(style.getPropertyValue("object-position"), frame);
+    reasons.push(...position.reasons);
+    if (position.position.x !== 0.5 || position.position.y !== 0.5) {
+      node.objectPosition = position.position;
+    }
   }
 
   private finish(node: SceneNode, reasons: readonly string[]): void {

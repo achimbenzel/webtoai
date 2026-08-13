@@ -69,6 +69,24 @@ interface Host {
   base64Decode(input: string): string;
   parseDataUrl(url: string): { mime: string; base64: boolean; data: string } | null;
   blendModeKey(mode: string): string | null;
+  isVectorAsset(asset: { kind: string; mime: string }, mime: string): boolean;
+  fitImage(
+    box: { top: number; left: number; width: number; height: number },
+    natural: { width: number; height: number },
+    fit: string,
+    position: { x: number; y: number } | null,
+  ): { top: number; left: number; width: number; height: number; overflows: boolean };
+  weightOfStyleName(style: string): number;
+  isItalicStyleName(style: string): boolean;
+  normaliseFamily(family: string): string;
+  familyStack(font: { family: string; stack?: string }): string[];
+  resolveFont(font: {
+    family: string;
+    weight: number;
+    style: string;
+    isWebFont?: boolean;
+    stack?: string;
+  }): { font: { name: string } | null; requested: string; used: string; substituted: boolean };
   _lastReport: unknown;
   _lastReportScene: unknown;
 }
@@ -281,6 +299,92 @@ describe("assets", () => {
       data: "AAA",
     });
     expect(host.parseDataUrl("https://example.test/a.png")).toBeNull();
+  });
+
+  it("recognises SVG bytes that arrived under a raster kind", () => {
+    // `<img src="logo.svg">` is captured as an <img>, so the request goes out
+    // as a raster. The mime is the only evidence of what came back, and the
+    // renderer places vector art through a completely different API.
+    expect(host.isVectorAsset({ kind: "raster", mime: "image/png" }, "image/png")).toBe(false);
+    expect(host.isVectorAsset({ kind: "raster", mime: "image/png" }, "image/svg+xml")).toBe(true);
+    expect(host.isVectorAsset({ kind: "raster", mime: "image/svg+xml" }, "")).toBe(true);
+    expect(host.isVectorAsset({ kind: "svg", mime: "" }, "")).toBe(true);
+  });
+});
+
+describe("object-fit", () => {
+  const box = { top: 0, left: 0, width: 200, height: 100 };
+
+  it("stretches to the box for fill, which is what the box always did", () => {
+    expect(host.fitImage(box, { width: 50, height: 50 }, "fill", null)).toEqual({
+      top: 0,
+      left: 0,
+      width: 200,
+      height: 100,
+      overflows: false,
+    });
+  });
+
+  it("preserves the aspect ratio and centres for contain", () => {
+    // A square image in a 2:1 box: height-limited, so 100x100 centred.
+    const fitted = host.fitImage(box, { width: 50, height: 50 }, "contain", null);
+    expect(fitted.width).toBe(100);
+    expect(fitted.height).toBe(100);
+    expect(fitted.left).toBe(50);
+    expect(fitted.top).toBe(0);
+    expect(fitted.overflows).toBe(false);
+  });
+
+  it("fills the box and overflows for cover", () => {
+    // Same square, now width-limited: 200x200, overflowing 100pt vertically.
+    const fitted = host.fitImage(box, { width: 50, height: 50 }, "cover", null);
+    expect(fitted.width).toBe(200);
+    expect(fitted.height).toBe(200);
+    expect(fitted.left).toBe(0);
+    // Centred vertically: the crop takes 50pt off each end.
+    expect(fitted.top).toBe(50);
+    expect(fitted.overflows).toBe(true);
+  });
+
+  it("keeps the intrinsic size for none, and crops if it does not fit", () => {
+    const small = host.fitImage(box, { width: 40, height: 20 }, "none", null);
+    expect(small.width).toBe(40);
+    expect(small.height).toBe(20);
+    expect(small.overflows).toBe(false);
+
+    const large = host.fitImage(box, { width: 400, height: 400 }, "none", null);
+    expect(large.width).toBe(400);
+    expect(large.overflows).toBe(true);
+  });
+
+  it("scale-down never enlarges but does shrink", () => {
+    // Smaller than the box: left alone, unlike contain which would grow it.
+    expect(host.fitImage(box, { width: 40, height: 20 }, "scale-down", null).width).toBe(40);
+    expect(host.fitImage(box, { width: 40, height: 20 }, "contain", null).width).toBe(200);
+    // Larger than the box: identical to contain.
+    expect(host.fitImage(box, { width: 400, height: 400 }, "scale-down", null).width).toBe(100);
+  });
+
+  it("distributes the leftover space by object-position", () => {
+    const left = host.fitImage(box, { width: 50, height: 50 }, "contain", { x: 0, y: 0 });
+    expect(left.left).toBe(0);
+    const right = host.fitImage(box, { width: 50, height: 50 }, "contain", { x: 1, y: 0 });
+    expect(right.left).toBe(100);
+  });
+
+  it("moves a cropped image the other way, because the leftover is negative", () => {
+    // y = 0 means "show the top of the image", so its top edge sits on the
+    // box's top edge and the overflow all hangs off the bottom.
+    const top = host.fitImage(box, { width: 50, height: 50 }, "cover", { x: 0.5, y: 0 });
+    expect(top.top).toBe(0);
+    const bottom = host.fitImage(box, { width: 50, height: 50 }, "cover", { x: 0.5, y: 1 });
+    // Artboard y grows upwards, so "flush bottom" is 100pt higher a top edge.
+    expect(bottom.top).toBe(100);
+  });
+
+  it("falls back to the box when there is no intrinsic size", () => {
+    const fitted = host.fitImage(box, { width: 0, height: 0 }, "cover", null);
+    expect(fitted).toEqual({ top: 0, left: 0, width: 200, height: 100, overflows: false });
   });
 });
 
@@ -698,6 +802,211 @@ describe("render — text", () => {
     );
     expect(report.fontSubstitutions.length).toBeGreaterThan(0);
     expect(report.fontSubstitutions[0]?.requested).toContain("Nonexistent Sans");
+  });
+});
+
+describe("font matching", () => {
+  it("reads a weight out of an Illustrator style name", () => {
+    expect(host.weightOfStyleName("Thin")).toBe(100);
+    expect(host.weightOfStyleName("Light")).toBe(300);
+    expect(host.weightOfStyleName("Regular")).toBe(400);
+    expect(host.weightOfStyleName("Medium")).toBe(500);
+    expect(host.weightOfStyleName("SemiBold")).toBe(600);
+    expect(host.weightOfStyleName("Bold")).toBe(700);
+    expect(host.weightOfStyleName("Black")).toBe(900);
+    // A style name that says nothing about weight is the regular cut.
+    expect(host.weightOfStyleName("Italic")).toBe(400);
+    expect(host.weightOfStyleName("")).toBe(400);
+  });
+
+  it("does not file ExtraBold as Bold, or UltraLight as Light", () => {
+    // The whole point of the ordered table: every short weight name is a
+    // substring of a longer one.
+    expect(host.weightOfStyleName("ExtraBold")).toBe(800);
+    expect(host.weightOfStyleName("SemiBold Italic")).toBe(600);
+    expect(host.weightOfStyleName("UltraLight")).toBe(200);
+    expect(host.weightOfStyleName("Extra Light")).toBe(300);
+  });
+
+  it("recognises slant under either name", () => {
+    expect(host.isItalicStyleName("Bold Italic")).toBe(true);
+    expect(host.isItalicStyleName("Oblique")).toBe(true);
+    expect(host.isItalicStyleName("Bold")).toBe(false);
+  });
+
+  it("picks the cut the page asked for, not just bold or not-bold", () => {
+    const at = (weight: number, style = "normal") =>
+      host.resolveFont({ family: "Inter", weight, style, isWebFont: false }).used;
+
+    expect(at(100)).toBe("Inter-Thin");
+    expect(at(300)).toBe("Inter-Light");
+    expect(at(400)).toBe("Inter-Regular");
+    expect(at(500)).toBe("Inter-Medium");
+    expect(at(600)).toBe("Inter-SemiBold");
+    expect(at(700)).toBe("Inter-Bold");
+    expect(at(900)).toBe("Inter-Black");
+  });
+
+  it("takes the nearest weight when the exact cut is missing", () => {
+    // Arial has Regular and Bold only.
+    const at = (weight: number) =>
+      host.resolveFont({ family: "Arial", weight, style: "normal", isWebFont: false }).used;
+    expect(at(300)).toBe("ArialMT");
+    expect(at(900)).toBe("Arial-BoldMT");
+    // 500 goes DOWN to 400, not up to 700: CSS checks 400-500 in ascending
+    // order first, then everything below the target, and only then above 500.
+    expect(at(500)).toBe("ArialMT");
+  });
+
+  it("prefers the heavier face inside the 400-500 band, as CSS does", () => {
+    const at = (weight: number) =>
+      host.resolveFont({ family: "Inter", weight, style: "normal", isWebFont: false }).used;
+    expect(at(450)).toBe("Inter-Medium");
+    // Below the band the tie goes the other way.
+    expect(at(350)).toBe("Inter-Regular");
+  });
+
+  it("never trades slant for weight", () => {
+    // Inter has no Light Italic. An upright Light would match the weight
+    // exactly; Medium Italic is still the better face.
+    const resolved = host.resolveFont({
+      family: "Inter",
+      weight: 300,
+      style: "italic",
+      isWebFont: false,
+    });
+    expect(resolved.used).toBe("Inter-MediumItalic");
+  });
+
+  it("does not hand out a condensed face to a page that did not ask for one", () => {
+    const resolved = host.resolveFont({
+      family: "Helvetica Neue",
+      weight: 700,
+      style: "normal",
+      isWebFont: false,
+    });
+    expect(resolved.used).toBe("HelveticaNeue-Bold");
+  });
+
+  it("matches family names across spacing and case", () => {
+    expect(host.normaliseFamily("Helvetica Neue")).toBe(host.normaliseFamily("HelveticaNeue"));
+    expect(host.normaliseFamily('"Inter"')).toBe("inter");
+    expect(host.normaliseFamily("Inter")).not.toBe(host.normaliseFamily("Inter Tight"));
+  });
+
+  it("walks the CSS stack instead of jumping to the global fallback", () => {
+    const stack = host.familyStack({ family: "Brand Sans", stack: '"Brand Sans", Inter, Arial' });
+    expect(stack).toEqual(["Brand Sans", "Inter", "Arial"]);
+
+    // Brand Sans is a web font nobody has; the browser would have drawn Inter,
+    // so that is what the document should get.
+    const resolved = host.resolveFont({
+      family: "Brand Sans",
+      weight: 600,
+      style: "normal",
+      isWebFont: true,
+      stack: '"Brand Sans", Inter, Arial',
+    });
+    expect(resolved.used).toBe("Inter-SemiBold");
+    // Still a substitution: the page asked for a font that is not here.
+    expect(resolved.substituted).toBe(true);
+  });
+});
+
+describe("render — images", () => {
+  const png =
+    "data:image/png;base64," + Buffer.from("not really a png", "binary").toString("base64");
+
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40"><path d="M0 0h120v40H0z"/></svg>';
+
+  const imageScene = (nodeOverrides: Record<string, unknown>, asset: Record<string, unknown>) =>
+    scene(
+      node({
+        role: "image",
+        frame: { x: 0, y: 0, w: 200, h: 100 },
+        assetId: "a1",
+        ...nodeOverrides,
+      }),
+      { assets: [{ id: "a1", width: 100, height: 100, ...asset }] },
+    );
+
+  it("places a raster through placedItems", () => {
+    const { doc } = render(imageScene({}, { kind: "raster", mime: "image/png", dataUrl: png }));
+    const placed = allItems(doc.layers[0]!).find((i) => i.kind === "placed");
+    expect(placed?.name).toBe("div");
+    expect(placed?.width).toBe(200);
+    expect(placed?.height).toBe(100);
+  });
+
+  it("imports an SVG as vector art, not through placedItems", () => {
+    // placedItems cannot place an SVG. This is why the logo was missing.
+    const { doc, report } = render(
+      imageScene({ role: "svg", name: "logo" }, { kind: "svg", mime: "image/svg+xml", svg }),
+    );
+    const items = allItems(doc.layers[0]!);
+    expect(items.some((i) => i.kind === "placed")).toBe(false);
+    const imported = items.find((i) => i.kind === "imported");
+    expect(imported).toBeDefined();
+    expect(imported?.file).toBe("/tmp/web2ai/assets/a1.svg");
+    expect(report.rows.some((r) => r.code === "svg-import-failed")).toBe(false);
+  });
+
+  it("routes an <img> that turned out to be SVG through the vector path too", () => {
+    const dataUrl = "data:image/svg+xml;base64," + Buffer.from(svg, "binary").toString("base64");
+    const { doc } = render(
+      imageScene({ name: "logo" }, { kind: "raster", mime: "image/svg+xml", dataUrl }),
+    );
+    expect(allItems(doc.layers[0]!).some((i) => i.kind === "imported")).toBe(true);
+  });
+
+  it("stretches to the box only when object-fit says fill", () => {
+    const { doc } = render(
+      imageScene({ role: "svg" }, { kind: "svg", mime: "image/svg+xml", svg }),
+    );
+    // No objectFit on the node: the old behaviour, and the CSS default.
+    const imported = allItems(doc.layers[0]!).find((i) => i.kind === "imported");
+    expect(imported?.width).toBe(200);
+    expect(imported?.height).toBe(100);
+  });
+
+  it("keeps the aspect ratio for contain", () => {
+    const { doc } = render(
+      imageScene(
+        { role: "svg", objectFit: "contain" },
+        { kind: "svg", mime: "image/svg+xml", svg },
+      ),
+    );
+    // The SVG is 120x40 (3:1) inside a 200x100 box: width-limited to 200x66.7.
+    const imported = allItems(doc.layers[0]!).find((i) => i.kind === "imported");
+    expect(imported?.width).toBeCloseTo(200, 5);
+    expect(imported?.height).toBeCloseTo(200 / 3, 5);
+  });
+
+  it("crops instead of letting a cover image paint over its neighbours", () => {
+    const { doc } = render(
+      imageScene({ role: "svg", objectFit: "cover" }, { kind: "svg", mime: "image/svg+xml", svg }),
+    );
+    const items = allItems(doc.layers[0]!);
+    const group = items.find((i) => i.kind === "group" && i.clipped === true);
+    expect(group).toBeDefined();
+    // The mask is the topmost object in the group, which is how Illustrator
+    // decides what clips what.
+    expect(group?.children?.items[0]?.name).toBe("crop");
+    // 3:1 art in a 2:1 box is height-limited, so it overflows horizontally.
+    const imported = items.find((i) => i.kind === "imported");
+    expect(imported?.height).toBeCloseTo(100, 5);
+    expect(imported?.width).toBeCloseTo(300, 5);
+  });
+
+  it("says so when object-fit needs an intrinsic size it does not have", () => {
+    const { report } = render(
+      imageScene(
+        { objectFit: "cover" },
+        { kind: "raster", mime: "image/png", dataUrl: png, width: 0, height: 0 },
+      ),
+    );
+    expect(report.rows.some((r) => r.code === "object-fit-no-intrinsic-size")).toBe(true);
   });
 });
 

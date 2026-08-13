@@ -61,6 +61,125 @@ web2ai.findInstalledFont = function (name) {
 };
 
 /**
+ * Weight names as they appear in font style names, with their usWeightClass.
+ *
+ * Ordered longest first, because the matcher takes the first hit and every
+ * short name here is a substring of a longer one: "ExtraBold" contains "Bold",
+ * "UltraLight" contains "Light". Checking "bold" first would file every
+ * ExtraBold face as 700.
+ */
+web2ai.WEIGHT_NAMES = [
+  ["extrablack", 950],
+  ["ultrablack", 950],
+  ["extralight", 200],
+  ["ultralight", 200],
+  ["extrabold", 800],
+  ["ultrabold", 800],
+  ["semilight", 350],
+  ["demilight", 350],
+  ["semibold", 600],
+  ["demibold", 600],
+  ["hairline", 100],
+  ["regular", 400],
+  ["medium", 500],
+  ["normal", 400],
+  ["light", 300],
+  ["black", 900],
+  ["heavy", 900],
+  ["roman", 400],
+  ["book", 400],
+  ["bold", 700],
+  ["demi", 600],
+  ["semi", 600],
+  ["thin", 100],
+  ["ultra", 900]
+];
+
+/** Width keywords; a page that did not ask for one should not be given one. */
+web2ai.WIDTH_NAMES = ["condensed", "narrow", "compressed", "expanded", "extended", "wide"];
+
+/**
+ * The numeric weight an Illustrator style name implies.
+ *
+ * Pure function over a string -- the part of font matching that is worth
+ * testing, and the part that was wrong: the previous matcher only asked
+ * "does the name contain 'bold'", which collapsed Thin, Light, Regular,
+ * Medium and SemiBold into a single bucket and then picked whichever of them
+ * Illustrator happened to enumerate first.
+ *
+ * @param {string} styleName e.g. "SemiBold Italic", "Light", ""
+ * @returns {number} 100-950; 400 when the name says nothing about weight
+ */
+web2ai.weightOfStyleName = function (styleName) {
+  var name = String(styleName || "").toLowerCase();
+  var i;
+  for (i = 0; i < web2ai.WEIGHT_NAMES.length; i += 1) {
+    // es3-ok: String.indexOf
+    if (name.indexOf(web2ai.WEIGHT_NAMES[i][0]) !== -1) {
+      return web2ai.WEIGHT_NAMES[i][1];
+    }
+  }
+  return 400;
+};
+
+/** @param {string} styleName @returns {boolean} */
+web2ai.isItalicStyleName = function (styleName) {
+  var name = String(styleName || "").toLowerCase();
+  return name.indexOf("italic") !== -1 || name.indexOf("oblique") !== -1; // es3-ok: String.indexOf
+};
+
+/** @param {string} styleName @returns {boolean} */
+web2ai.hasWidthKeyword = function (styleName) {
+  var name = String(styleName || "").toLowerCase();
+  var i;
+  for (i = 0; i < web2ai.WIDTH_NAMES.length; i += 1) {
+    // es3-ok: String.indexOf
+    if (name.indexOf(web2ai.WIDTH_NAMES[i]) !== -1) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * How well an installed face answers a request. Lower is better.
+ *
+ * Slant dominates: an upright face at the wrong weight is a far better stand-in
+ * for italic text than an italic face at the right one is for upright text --
+ * the reader sees slant immediately and a 100-unit weight step barely at all.
+ *
+ * Within the same slant, faces are ranked by weight distance, breaking ties
+ * towards the heavier face. That one-unit nudge reproduces the CSS font
+ * matching rule without special-casing it: a request for 450 lands on Medium
+ * rather than Regular (the 400-500 band searches upwards first), while 500
+ * against a family of only Regular and Bold still lands on Regular, because
+ * 100 apart beats 200 apart.
+ *
+ * @param {string} styleName the installed face's style name
+ * @param {number} weight requested numeric weight
+ * @param {boolean} italic requested slant
+ * @returns {number} distance, 0 for a perfect match
+ */
+web2ai.fontStyleDistance = function (styleName, weight, italic) {
+  var faceWeight = web2ai.weightOfStyleName(styleName);
+  var faceItalic = web2ai.isItalicStyleName(styleName);
+
+  var distance = Math.abs(faceWeight - weight);
+  if (faceItalic !== italic) {
+    // Larger than the widest possible weight gap (950 - 100), so no weight
+    // match can ever outrank the correct slant.
+    distance += 1000;
+  }
+  if (faceWeight < weight) {
+    distance += 1;
+  }
+  if (web2ai.hasWidthKeyword(styleName)) {
+    distance += 2000;
+  }
+  return distance;
+};
+
+/**
  * Searches installed fonts whose family matches, preferring a matching style.
  *
  * This is the step between the explicit map and giving up: a page asking for
@@ -72,41 +191,31 @@ web2ai.findInstalledFont = function (name) {
  * @returns {Object|null}
  */
 web2ai.findFontByFamily = function (family, key) {
-  var wanted = String(family || "").toLowerCase();
+  var wanted = web2ai.normaliseFamily(family);
   if (wanted.length === 0) {
     return null;
   }
 
-  var isBold = key.indexOf("|") !== -1 && Number(key.split("|")[0]) >= 600; // es3-ok: String.indexOf
-  var isItalic = key.indexOf("italic") !== -1; // es3-ok: String.indexOf
+  var parts = String(key).split("|");
+  var weight = Number(parts[0]);
+  if (!isFinite(weight)) {
+    weight = 400;
+  }
+  var italic = parts[1] === "italic";
 
   var best = null;
-  var bestScore = -1;
+  var bestDistance = -1;
   var i;
 
   for (i = 0; i < app.textFonts.length; i += 1) {
     var font = app.textFonts[i];
-    var fontFamily = String(font.family || "").toLowerCase();
-    if (fontFamily !== wanted) {
+    if (web2ai.normaliseFamily(font.family) !== wanted) {
       continue;
     }
 
-    var styleName = String(font.style || "").toLowerCase();
-    var styleBold = styleName.indexOf("bold") !== -1; // es3-ok: String.indexOf
-    var styleItalic = styleName.indexOf("italic") !== -1 || styleName.indexOf("oblique") !== -1; // es3-ok: String.indexOf
-
-    // Prefer the face whose weight and slant both match; a family hit with the
-    // wrong face still beats no hit at all.
-    var score = 1;
-    if (styleBold === isBold) {
-      score += 2;
-    }
-    if (styleItalic === isItalic) {
-      score += 2;
-    }
-
-    if (score > bestScore) {
-      bestScore = score;
+    var distance = web2ai.fontStyleDistance(font.style, weight, italic);
+    if (bestDistance === -1 || distance < bestDistance) {
+      bestDistance = distance;
       best = font;
     }
   }
@@ -115,30 +224,89 @@ web2ai.findFontByFamily = function (family, key) {
 };
 
 /**
- * Resolves a scene font to an installed Illustrator font.
+ * Family names for comparison.
  *
- * Order: the explicit map, then the generic-family map, then a search by
- * family name, then the configured fallback. Every step past the first is
- * recorded as a substitution.
+ * CSS says family names are matched case-insensitively and that runs of
+ * whitespace are equivalent; Illustrator reports "Helvetica Neue" where a page
+ * may say "HelveticaNeue" or "Helvetica  Neue". Dropping spaces and case
+ * removes the difference without letting unrelated families collide.
+ *
+ * @param {string} family
+ * @returns {string}
+ */
+web2ai.normaliseFamily = function (family) {
+  return String(family || "")
+    .toLowerCase()
+    .replace(/^['"]|['"]$/g, "")
+    .replace(/[\s_]+/g, "");
+};
+
+/**
+ * The CSS font-family list, first entry first.
+ *
+ * The scene records both the resolved first family and the whole declared
+ * stack. Walking the stack is what the browser did to pick the face the user
+ * actually saw, so a page whose first family is a web font that is not
+ * installed here should land on the same second choice the browser would have
+ * -- not on the global fallback.
  *
  * @param {Object} font scene FontRef
- * @returns {Object} {font: textFont|null, requested: string, used: string, substituted: boolean}
+ * @returns {Array} family names, deduplicated, without quotes
  */
-web2ai.resolveFont = function (font) {
-  var map = web2ai.fontMap();
-  var key = web2ai.fontKey(font);
-  var family = String(font.family || "");
-  var lower = family.toLowerCase();
-  var requested = family + " " + key;
+web2ai.familyStack = function (font) {
+  var out = [];
+  var seen = {};
+  var raw = [String(font.family || "")];
 
-  // 1. Explicit mapping.
+  if (font.stack) {
+    var parts = String(font.stack).split(",");
+    var j;
+    for (j = 0; j < parts.length; j += 1) {
+      raw.push(parts[j]);
+    }
+  }
+
+  var i;
+  for (i = 0; i < raw.length; i += 1) {
+    var name = web2ai.trimFamily(raw[i]);
+    if (name.length === 0) {
+      continue;
+    }
+    var key = web2ai.normaliseFamily(name);
+    if (Object.prototype.hasOwnProperty.call(seen, key)) {
+      continue;
+    }
+    seen[key] = true;
+    out.push(name);
+  }
+
+  return out;
+};
+
+/** Strips surrounding whitespace and CSS quotes from one family name. */
+web2ai.trimFamily = function (name) {
+  return String(name || "")
+    .replace(/^[\s'"]+/, "")
+    .replace(/[\s'"]+$/, "");
+};
+
+/**
+ * Finds an installed font for one family name.
+ *
+ * @returns {Object|null} {font, used, reason}
+ */
+web2ai.resolveFamily = function (family, key) {
+  var map = web2ai.fontMap();
+  var lower = String(family).toLowerCase();
+
+  // 1. Explicit mapping, which is per weight and slant.
   var families = map.families || {};
   if (Object.prototype.hasOwnProperty.call(families, lower)) {
     var entry = families[lower];
     if (Object.prototype.hasOwnProperty.call(entry, key)) {
       var mapped = web2ai.findInstalledFont(entry[key]);
       if (mapped !== null) {
-        return { font: mapped, requested: requested, used: entry[key], substituted: false };
+        return { font: mapped, used: entry[key], reason: "font-map" };
       }
     }
   }
@@ -148,23 +316,54 @@ web2ai.resolveFont = function (font) {
   if (Object.prototype.hasOwnProperty.call(generics, lower)) {
     var generic = web2ai.findInstalledFont(generics[lower]);
     if (generic !== null) {
-      web2ai.recordFontSubstitution(requested, generics[lower], "generic-family");
-      return { font: generic, requested: requested, used: generics[lower], substituted: true };
+      return { font: generic, used: generics[lower], reason: "generic-family" };
     }
   }
 
   // 3. The family is installed under its own name.
   var byFamily = web2ai.findFontByFamily(family, key);
   if (byFamily !== null) {
-    var exact = String(byFamily.name);
-    var isExact = !font.isWebFont;
-    if (!isExact) {
-      web2ai.recordFontSubstitution(requested, exact, "family-match");
-    }
-    return { font: byFamily, requested: requested, used: exact, substituted: !isExact };
+    return { font: byFamily, used: String(byFamily.name), reason: "family-match" };
   }
 
-  // 4. Give up and say so.
+  return null;
+};
+
+/**
+ * Resolves a scene font to an installed Illustrator font.
+ *
+ * For each family in the CSS stack, in order: the explicit map, the
+ * generic-family map, then a search by family name. Failing the whole stack,
+ * the configured fallback. Anything but an exact hit on the first family is
+ * recorded as a substitution -- nothing here substitutes silently.
+ *
+ * @param {Object} font scene FontRef
+ * @returns {Object} {font: textFont|null, requested: string, used: string, substituted: boolean}
+ */
+web2ai.resolveFont = function (font) {
+  var key = web2ai.fontKey(font);
+  var stack = web2ai.familyStack(font);
+  var requested = String(font.family || "") + " " + key;
+
+  var i;
+  for (i = 0; i < stack.length; i += 1) {
+    var hit = web2ai.resolveFamily(stack[i], key);
+    if (hit === null) {
+      continue;
+    }
+
+    // The first family found under its own name is what the page asked for.
+    // Everything else -- a mapped name, a generic, a later entry in the stack
+    // -- is a stand-in and is reported as one.
+    var exact =
+      i === 0 && (hit.reason === "font-map" || (hit.reason === "family-match" && !font.isWebFont));
+    if (!exact) {
+      web2ai.recordFontSubstitution(requested, hit.used, i === 0 ? hit.reason : "family-stack");
+    }
+    return { font: hit.font, requested: requested, used: hit.used, substituted: !exact };
+  }
+
+  // Nothing in the stack is installed. Say so.
   var config = web2ai.config();
   var fallbackName = config.render.defaultFontFallback;
   var fallback = web2ai.findInstalledFont(fallbackName);
