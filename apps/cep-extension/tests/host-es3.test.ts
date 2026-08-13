@@ -35,6 +35,15 @@ describe("ExtendScript host is ES3", () => {
     expect(() => parse(source, { ecmaVersion: 3, sourceType: "script" })).not.toThrow();
   });
 
+  it.each(hostSources())("%s is pure ASCII", (name) => {
+    // ExtendScript reads .jsx as ASCII unless told otherwise. A stray em dash
+    // in a comment is enough to mis-decode, and a single decode error takes
+    // the whole bundle down — the same failure mode as an ES5 token.
+    const source = readFileSync(join(hostDir, name), "utf8");
+    const offenders = [...source].filter((char) => char.charCodeAt(0) > 127);
+    expect(offenders, `non-ASCII characters: ${[...new Set(offenders)].join(" ")}`).toEqual([]);
+  });
+
   it("contains no ES5+ constructs that acorn's ES3 mode still accepts", () => {
     // acorn's ES3 mode catches syntax, not library surface. These are the
     // built-ins ExtendScript lacks; grep for them explicitly.

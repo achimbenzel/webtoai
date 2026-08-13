@@ -1,5 +1,5 @@
 /**
- * web2ai ExtendScript host — the functions the panel calls via evalScript.
+ * web2ai ExtendScript host -- the functions the panel calls via evalScript.
  * ES3 ONLY.
  *
  * Every entry point returns the JSON envelope produced by web2ai.safeCall, so

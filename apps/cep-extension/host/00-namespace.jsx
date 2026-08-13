@@ -1,5 +1,5 @@
 /**
- * web2ai ExtendScript host — namespace bootstrap.
+ * web2ai ExtendScript host -- namespace bootstrap.
  *
  * ============================ ES3 ONLY ============================
  * ExtendScript is ES3. A single ES5+ token anywhere in this bundle makes the
@@ -24,7 +24,7 @@ web2ai.SCHEMA_VERSION = 1;
 
 /**
  * Wraps a host entry point so that CEP never receives the opaque string
- * "EvalScript error." — every failure comes back as structured JSON.
+ * "EvalScript error." -- every failure comes back as structured JSON.
  *
  * @param {function} fn
  * @returns {string} JSON: {ok:true, value:*} or {ok:false, error:string, line:number}

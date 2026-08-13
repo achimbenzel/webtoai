@@ -1,5 +1,5 @@
 /**
- * web2ai ExtendScript host — file IO and config loading. ES3 ONLY.
+ * web2ai ExtendScript host -- file IO and config loading. ES3 ONLY.
  *
  * Large payloads never travel through evalScript: the panel writes the scene
  * to a temp file and passes only the path. Everything in this file exists to

@@ -55,13 +55,16 @@ and enables `PlayerDebugMode` so Illustrator will load an unsigned panel:
 
 Then restart Illustrator and open **Window ▸ Extensions ▸ web2ai**.
 
-Two things are **off by default**, because both are among the handful of
-differences that can stop CEP from listing a panel at all, and having them as
-one-flag rebuilds makes them quick to rule out:
+Remote debugging is on: <http://localhost:8088> while the panel is open.
+
+Node inside the panel is **off by default** — the `CEFCommandLine` switches
+are one of the few things that can stop CEP from listing a panel at all, so
+they are a one-flag rebuild rather than a hand edit. Milestone 2's transport
+server needs them:
 
 ```bash
-pnpm --filter @web2ai/cep-extension build -- --enable-node   # Node inside the panel (milestone 2 needs this)
-pnpm --filter @web2ai/cep-extension build -- --debug-file    # remote debugging on http://localhost:8088
+pnpm --filter @web2ai/cep-extension build -- --enable-node
+pnpm --filter @web2ai/cep-extension build -- --no-debug-file   # drop .debug to rule it out
 ```
 
 `pnpm dev:install --uninstall` removes the link. `--copy` installs a copy
@@ -104,6 +107,9 @@ The three usual causes, in order of how often they bite:
 5. **An XML comment before `<ExtensionManifest>`.** CEP's manifest reader is
    stricter than a general XML parser. Comments inside the root element are
    fine; one before it is not. Same for `.debug`.
+6. **Non-ASCII in the ExtendScript host.** ExtendScript reads `.jsx` as ASCII
+   unless told otherwise; one mis-decoded byte takes the whole bundle down.
+   The build refuses to emit a non-ASCII host bundle, and a test enforces it.
 
 `docs/ARCHITECTURE.md` has the full table of these constraints and what each
 one costs.
