@@ -32,7 +32,18 @@
       <Locale Code="All" />
     </LocaleList>
     <RequiredRuntimeList>
-      <RequiredRuntime Name="CSXS" Version="11.0" />
+      <!--
+        This is a *minimum*, not a target. Declaring 11.0 is the single most
+        common reason an otherwise correct panel never appears: CEP checks it
+        before it looks at anything else, and a host that reports a lower CSXS
+        revision than the number here is dropped without a word. Extensions
+        that load on Illustrator 2021-2026 in practice all declare 9.0.
+
+        The CEP 11 requirement is still enforced — by the <Host> range above,
+        which admits Illustrator 25.0 (CC 2021) and newer, the releases that
+        ship CEP 11. Lowering this line widens nothing in practice.
+      -->
+      <RequiredRuntime Name="CSXS" Version="9.0" />
     </RequiredRuntimeList>
   </ExecutionEnvironment>
 
@@ -42,11 +53,16 @@
         <Resources>
           <MainPath>./client/index.html</MainPath>
           <ScriptPath>./host/index.jsx</ScriptPath>
+          <!--
+            Only the two parameters the architecture actually needs.
+            --allow-file-access and --allow-file-access-from-files were removed
+            from Chromium; passing a switch the embedded CEF no longer knows is
+            a risk with no upside, since the panel loads its own files from its
+            own directory either way.
+          -->
           <CEFCommandLine>
             <Parameter>--enable-nodejs</Parameter>
             <Parameter>--mixed-context</Parameter>
-            <Parameter>--allow-file-access</Parameter>
-            <Parameter>--allow-file-access-from-files</Parameter>
           </CEFCommandLine>
         </Resources>
         <Lifecycle>

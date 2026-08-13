@@ -89,6 +89,7 @@ function checkBuild() {
   for (const problem of result.problems) {
     if (!/MainPath|ScriptPath/.test(problem)) line("fail", problem);
   }
+  for (const warning of result.warnings ?? []) line("warn", warning);
 
   if (result.ok) line("ok", "extension folder is complete");
   return result.ok;
@@ -253,6 +254,83 @@ function compareWithNeighbours(dir) {
       "info",
       "every extension that loads here is a plain folder — none is a link",
       "If the checks above all pass, install a real copy: pnpm dev:install --copy",
+    );
+  }
+}
+
+// ── 2c. Diff against a manifest known to work ───────────────────────────────
+
+/**
+ * Compares our manifest field by field against one that is known to load.
+ *
+ * When the install is provably fine, the cause is in the manifest, and the
+ * fastest way to find it is a working example. Point this at any extension
+ * folder — or at a manifest.xml directly — that Illustrator does list:
+ *
+ *   pnpm dev:doctor --reference "C:\\path\\to\\GridHandler"
+ */
+function checkReference(referencePath) {
+  heading("Comparison with a manifest known to load");
+
+  const root = referencePath.replace(/[\\/]CSXS[\\/]manifest\.xml$/i, "");
+  const theirs = readManifest(root);
+  if (!theirs.exists) {
+    line("fail", `no CSXS/manifest.xml under ${root}`);
+    return;
+  }
+
+  const ours = readManifest(distDir);
+  const fields = [
+    ["ExtensionManifest Version", ours.manifestVersion, theirs.manifestVersion],
+    ["Host", `${ours.hostName} ${ours.hostVersion}`, `${theirs.hostName} ${theirs.hostVersion}`],
+    ["RequiredRuntime CSXS", ours.requiredRuntime, theirs.requiredRuntime],
+    [
+      "CEFCommandLine",
+      (ours.cefParameters ?? []).join(" ") || "(empty)",
+      (theirs.cefParameters ?? []).join(" ") || "(empty)",
+    ],
+    [".debug present", existsSync(join(distDir, ".debug")), existsSync(join(root, ".debug"))],
+  ];
+
+  let differences = 0;
+  for (const [label, mine, theirsValue] of fields) {
+    if (String(mine) === String(theirsValue)) {
+      line("ok", `${label}: same (${mine})`);
+      continue;
+    }
+    differences += 1;
+    line("warn", `${label} differs`, `ours: ${mine}   |   works: ${theirsValue}`);
+  }
+
+  // The resource paths almost always differ — different projects lay their
+  // files out differently. What matters is whether they resolve, not whether
+  // they match, so a differing-but-working path is not reported as a candidate.
+  for (const [label, mine, theirsValue] of [
+    ["MainPath", ours.mainPath, theirs.mainPath],
+    ["ScriptPath", ours.scriptPath, theirs.scriptPath],
+  ]) {
+    const mineOk = mine !== undefined && existsSync(resolveManifestPath(distDir, mine));
+    const theirsOk =
+      theirsValue !== undefined && existsSync(resolveManifestPath(root, theirsValue));
+    if (mineOk) {
+      line(
+        "ok",
+        `${label}: ${mine} resolves (theirs: ${theirsValue}${theirsOk ? "" : ", missing"})`,
+      );
+    } else {
+      differences += 1;
+      line("fail", `${label}: ${mine} does not resolve`, `theirs, which works: ${theirsValue}`);
+    }
+  }
+
+  if (differences === 0) {
+    line("ok", "the two manifests agree on every field that affects loading");
+    line("info", "the cause is outside the manifest — see the remaining steps below");
+  } else {
+    line(
+      "info",
+      `${differences} field(s) differ; each one is a candidate. RequiredRuntime and ` +
+        "CEFCommandLine are the two that most often decide it.",
     );
   }
 }
@@ -461,10 +539,19 @@ function printRemainingSteps() {
   console.log("     isolates the manifest from everything else.");
 }
 
+const referenceArg = process.argv.slice(2).find((arg) => arg.startsWith("--reference"));
+const referencePath =
+  referenceArg === undefined
+    ? undefined
+    : referenceArg.includes("=")
+      ? referenceArg.slice(referenceArg.indexOf("=") + 1)
+      : process.argv[process.argv.indexOf(referenceArg) + 1];
+
 console.log("web2ai CEP doctor");
 const built = checkBuild();
 if (built) checkHostBundle();
 checkInstall();
+if (referencePath !== undefined && referencePath !== "") checkReference(referencePath);
 checkHostApplication();
 checkDebugMode();
 summary();

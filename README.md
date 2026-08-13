@@ -63,6 +63,13 @@ wrong:
 pnpm dev:doctor
 ```
 
+If you have another extension that Illustrator _does_ list, point the doctor at
+it — a working manifest is the fastest way to find the offending field:
+
+```bash
+pnpm dev:doctor --reference "C:\path\to\WorkingExtension"
+```
+
 The three usual causes, in order of how often they bite:
 
 1. **An incomplete build.** If `MainPath` or `ScriptPath` does not resolve, CEP
@@ -76,6 +83,13 @@ The three usual causes, in order of how often they bite:
 3. **The symlink.** On Windows, CEP's scanner does not reliably follow reparse
    points. `pnpm dev:install --copy` installs a real folder — at the cost of
    having to reinstall after each rebuild.
+4. **`RequiredRuntime`.** It is a _minimum_, and CEP checks it before anything
+   else. Declaring a CSXS revision higher than the host reports drops the
+   extension silently. web2ai declares 9.0 for that reason; the Illustrator
+   version requirement is carried by the `<Host>` range instead.
+5. **The `.debug` file.** CEP's reader for it is stricter than a general XML
+   parser. Build without it to rule it out:
+   `pnpm --filter @web2ai/cep-extension build -- --no-debug-file`
 
 Illustrator only scans at startup, so quit it completely between attempts.
 

@@ -26,6 +26,10 @@ const repoRoot = dirname(dirname(appDir));
 const distDir = join(appDir, "dist");
 
 const watch = process.argv.includes("--watch");
+// The .debug file only enables remote debugging. CEP's reader for it is
+// stricter than a general XML parser, so it is worth being able to take it out
+// of the picture when a panel refuses to appear.
+const noDebugFile = process.argv.includes("--no-debug-file");
 
 /** Order matters: json2.js first, then host sources by filename prefix. */
 const HOST_BANNER = `/*
@@ -60,6 +64,10 @@ function buildHostBundle() {
 }
 
 function buildDebugFile() {
+  if (noDebugFile) {
+    log(".debug skipped (--no-debug-file); remote debugging will be unavailable");
+    return;
+  }
   const config = JSON.parse(readFileSync(join(repoRoot, "config", "web2ai.config.json"), "utf8"));
   const manifest = readFileSync(join(appDir, "CSXS", "manifest.xml"), "utf8");
   const idMatch = manifest.match(/<Extension\s+Id="([^"]+)"/);

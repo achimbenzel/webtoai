@@ -151,14 +151,19 @@ export function hostRangeAccepts(range, version) {
  */
 export function validateExtension(root = distDir) {
   const problems = [];
+  const warnings = [];
 
   if (!existsSync(root)) {
-    return { ok: false, problems: [`${root} does not exist — the extension has not been built`] };
+    return {
+      ok: false,
+      warnings,
+      problems: [`${root} does not exist — the extension has not been built`],
+    };
   }
 
   const manifest = readManifest(root);
   if (!manifest.exists) {
-    return { ok: false, problems: [`${manifest.path} is missing`] };
+    return { ok: false, warnings, problems: [`${manifest.path} is missing`] };
   }
 
   for (const [label, value] of [
@@ -181,15 +186,18 @@ export function validateExtension(root = distDir) {
     problems.push(`ExtensionList and DispatchInfoList use different ids: ${[...ids].join(", ")}`);
   }
 
+  // These two do not stop CEP from *listing* the panel — they only decide
+  // whether Node is available inside it. Keeping them out of `problems` means
+  // a manifest stripped down for diagnosis still counts as installable.
   for (const required of ["--enable-nodejs", "--mixed-context"]) {
     if (!(manifest.cefParameters ?? []).includes(required)) {
-      problems.push(`CEFCommandLine is missing ${required}`);
+      warnings.push(`CEFCommandLine is missing ${required} — the transport server will not run`);
     }
   }
 
   if (!existsSync(join(root, "config", "web2ai.config.json"))) {
-    problems.push("config/web2ai.config.json was not copied into the extension");
+    warnings.push("config/web2ai.config.json was not copied into the extension");
   }
 
-  return { ok: problems.length === 0, problems, manifest };
+  return { ok: problems.length === 0, problems, warnings, manifest };
 }
