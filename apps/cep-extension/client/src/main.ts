@@ -212,17 +212,183 @@ async function openScene(): Promise<void> {
 
     // Being straight about what this does and does not do: the scene is in the
     // host's hands and validated, but nothing is drawn until milestone 3.
-    setLead(
-      status,
-      `Loaded and validated. Rendering to an Illustrator document arrives in milestone 3.`,
-      "ok",
-    );
+    setLead(status, "Loaded and validated.", "ok");
+    el<HTMLButtonElement>("import-scene").disabled = false;
+    setLead(el("import-status"), "Ready to build the document.", "none");
   } catch (error) {
     setLead(status, error instanceof Error ? error.message : String(error), "err");
     info.replaceChildren();
     renderSceneReport([]);
   } finally {
     button.disabled = false;
+  }
+}
+
+interface RenderBegin {
+  total: number;
+  documentName: string;
+  width: number;
+  height: number;
+  assetCount: number;
+}
+
+interface RenderStep {
+  done: boolean;
+  built: number;
+  failed: number;
+  total: number;
+}
+
+interface ReportRow {
+  level: "info" | "warn" | "unsupported";
+  code: string;
+  count: number;
+  detail: string;
+  examples: string[];
+}
+
+interface ReportSummary {
+  rows: ReportRow[];
+  fontSubstitutions: Array<{ requested: string; used: string; reason: string; count: number }>;
+  nodesTotal: number;
+  nodesBuilt: number;
+  nodesFailed: number;
+  unsupported: number;
+  warnings: number;
+  cancelled: boolean;
+  durationMs: number;
+}
+
+/** Set by the Cancel button; the render loop checks it between batches. */
+let cancelRequested = false;
+
+function setProgress(fraction: number, visible: boolean): void {
+  el("progress").hidden = !visible;
+  el("progress-bar").style.width = `${Math.round(Math.min(Math.max(fraction, 0), 1) * 100)}%`;
+}
+
+function renderImportReport(summary: ReportSummary): void {
+  const wrapper = el("import-report");
+  const body = el<HTMLTableSectionElement>("import-report-rows");
+  body.replaceChildren();
+
+  const rows: Array<[string, string]> = summary.rows.map((row) => [
+    `${row.code}${row.examples.length > 0 ? ` (${row.examples[0]}…)` : ""}`,
+    String(row.count),
+  ]);
+  for (const substitution of summary.fontSubstitutions) {
+    rows.push([
+      `font: ${substitution.requested} -> ${substitution.used}`,
+      String(substitution.count),
+    ]);
+  }
+
+  if (rows.length === 0) {
+    wrapper.hidden = true;
+    return;
+  }
+
+  el("import-report-summary").textContent =
+    `Report -- ${summary.unsupported} unsupported, ${summary.warnings} approximated`;
+
+  for (const [label, count] of rows) {
+    const tr = document.createElement("tr");
+    const first = document.createElement("td");
+    first.textContent = label;
+    const second = document.createElement("td");
+    second.textContent = count;
+    tr.append(first, second);
+    body.append(tr);
+  }
+  wrapper.hidden = false;
+}
+
+/**
+ * Runs the import.
+ *
+ * The loop lives here rather than in ExtendScript because ExtendScript blocks
+ * Illustrator outright: a single call would freeze the application with no
+ * progress and no way to stop. Driving it batch by batch is what makes both
+ * possible.
+ */
+async function importScene(): Promise<void> {
+  const status = el("import-status");
+  const info = el("import-info");
+  const importButton = el<HTMLButtonElement>("import-scene");
+  const cancelButton = el<HTMLButtonElement>("cancel-import");
+  const exportButton = el<HTMLButtonElement>("export-report");
+
+  cancelRequested = false;
+  importButton.disabled = true;
+  cancelButton.hidden = false;
+  exportButton.hidden = true;
+  info.replaceChildren();
+  el("import-report").hidden = true;
+
+  try {
+    await prepareHost(extensionRoot());
+
+    const begin = await callHost<RenderBegin>("startRender");
+    setLead(status, `Building ${begin.documentName}...`, "none");
+    setProgress(0, true);
+
+    let step: RenderStep = { done: false, built: 0, failed: 0, total: begin.total };
+    while (!step.done && !cancelRequested) {
+      step = await callHost<RenderStep>("stepRender", [PROGRESS_BATCH]);
+      setProgress(step.total > 0 ? step.built / step.total : 1, true);
+      setLead(status, `Building... ${step.built} of ${step.total} nodes`, "none");
+      // Yield to the panel so the Cancel button can actually be clicked.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    const summary = await callHost<ReportSummary>("finishRender", [cancelRequested]);
+    setProgress(1, false);
+
+    renderKeyValues(info, [
+      ["Document", begin.documentName],
+      ["Artboard", `${Math.round(begin.width)} x ${Math.round(begin.height)} pt`],
+      ["Nodes", `${summary.nodesBuilt} of ${summary.nodesTotal}`],
+      ["Failed", String(summary.nodesFailed)],
+      ["Unsupported", String(summary.unsupported)],
+      ["Approximated", String(summary.warnings)],
+      ["Time", `${(summary.durationMs / 1000).toFixed(1)} s`],
+    ]);
+    renderImportReport(summary);
+    exportButton.hidden = false;
+
+    if (summary.cancelled) {
+      setLead(status, "Cancelled. The partial document is left open.", "warn");
+    } else if (summary.nodesFailed > 0) {
+      setLead(
+        status,
+        `Done, with ${summary.nodesFailed} node(s) that failed. See the report.`,
+        "warn",
+      );
+    } else if (summary.unsupported > 0) {
+      setLead(status, "Done. Some features were degraded -- see the report.", "warn");
+    } else {
+      setLead(status, "Done. Nothing was degraded.", "ok");
+    }
+  } catch (error) {
+    setProgress(0, false);
+    setLead(status, error instanceof Error ? error.message : String(error), "err");
+  } finally {
+    importButton.disabled = false;
+    cancelButton.hidden = true;
+  }
+}
+
+/** Nodes per batch. Small enough to stay responsive, large enough to be quick. */
+const PROGRESS_BATCH = 40;
+
+async function exportReport(): Promise<void> {
+  const status = el("import-status");
+  try {
+    const result = await callHost<{ cancelled: boolean; path: string }>("exportReport");
+    if (result.cancelled) return;
+    setLead(status, `Report written to ${result.path}`, "ok");
+  } catch (error) {
+    setLead(status, error instanceof Error ? error.message : String(error), "err");
   }
 }
 
@@ -234,6 +400,16 @@ function main(): void {
   });
   el<HTMLButtonElement>("open-scene").addEventListener("click", () => {
     void openScene();
+  });
+  el<HTMLButtonElement>("import-scene").addEventListener("click", () => {
+    void importScene();
+  });
+  el<HTMLButtonElement>("cancel-import").addEventListener("click", () => {
+    cancelRequested = true;
+    setLead(el("import-status"), "Cancelling after the current batch...", "warn");
+  });
+  el<HTMLButtonElement>("export-report").addEventListener("click", () => {
+    void exportReport();
   });
 
   void refreshHost();

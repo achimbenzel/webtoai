@@ -128,3 +128,67 @@ web2ai.loadScene = function (path) {
     return summary;
   });
 };
+
+/**
+ * Starts a render: creates the document and queues the work.
+ *
+ * The panel then calls renderStep repeatedly. Splitting it this way is what
+ * lets the panel show progress and offer a Cancel button -- a single blocking
+ * call could do neither.
+ *
+ * @returns {string} JSON envelope with {total, documentName, width, height}
+ */
+web2ai.startRender = function () {
+  return web2ai.safeCall(function () {
+    return web2ai.renderBegin();
+  });
+};
+
+/**
+ * Renders the next batch.
+ *
+ * @param {number} batchSize
+ * @returns {string} JSON envelope with {done, built, failed, total}
+ */
+web2ai.stepRender = function (batchSize) {
+  return web2ai.safeCall(function () {
+    return web2ai.renderStep(batchSize);
+  });
+};
+
+/**
+ * Ends the render and returns the report.
+ *
+ * @param {boolean} cancelled
+ * @returns {string} JSON envelope with the report summary
+ */
+web2ai.finishRender = function (cancelled) {
+  return web2ai.safeCall(function () {
+    return web2ai.renderFinish(cancelled === true);
+  });
+};
+
+/**
+ * Writes the last render's report as Markdown next to the scene file.
+ *
+ * @returns {string} JSON envelope with the path written
+ */
+web2ai.exportReport = function () {
+  return web2ai.safeCall(function () {
+    if (web2ai._lastReport === null) {
+      throw new Error("No import has run yet, so there is no report to export.");
+    }
+
+    var markdown = web2ai.reportMarkdown(web2ai._lastReport, web2ai._lastReportScene);
+    var suggested = web2ai._scenePath
+      ? String(web2ai._scenePath).replace(/\.json$/i, "") + "-report.md"
+      : Folder.desktop.fsName + "/web2ai-report.md";
+
+    var file = File(suggested).saveDlg("Save the import report");
+    if (file === null) {
+      return { cancelled: true, path: "" };
+    }
+
+    return { cancelled: false, path: web2ai.writeTextFile(file.fsName, markdown) };
+  });
+};

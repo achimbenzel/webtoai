@@ -153,6 +153,18 @@ browser. Chromium is located via `PLAYWRIGHT_BROWSERS_PATH`, or set
 console on any page and call `__web2aiCapture()` to see what the walker makes
 of it.
 
+## Using it
+
+1. Capture a page with the Chrome extension. It downloads a `.web2ai.json`.
+2. In Illustrator, open **Window ▸ Extensions ▸ web2ai**.
+3. **Open scene file…** and pick the download. The panel validates it and
+   reports what it contains.
+4. **Build document.** A new document is created — never overwriting what is
+   open — with the page's layer structure. Progress is shown per batch and the
+   import can be cancelled; a cancelled import leaves the partial document.
+5. **Export report** writes a Markdown file listing everything that was
+   degraded, with counts, examples and font substitutions.
+
 ## How it works
 
 The short version: the Chrome side resolves CSS paint order properly (stacking

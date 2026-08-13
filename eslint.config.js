@@ -56,6 +56,7 @@ export default tseslint.config(
         GradientColor: "readonly",
         CMYKColor: "readonly",
         Matrix: "readonly",
+        BlendModes: "readonly",
         web2ai: "writable",
       },
     },
@@ -64,6 +65,9 @@ export default tseslint.config(
       "prefer-const": "off",
       "no-undef": "error",
       "no-unused-vars": ["warn", { args: "none", caughtErrors: "none" }],
+      // The base rule above is the configured one; the TypeScript variant has
+      // different defaults and this is not TypeScript.
+      "@typescript-eslint/no-unused-vars": "off",
       // ExtendScript ends a regex literal at the first unescaped "/", even
       // inside a character class, so `/[\\\/]+$/` needs an escape that modern
       // JavaScript considers useless. Obeying this rule here produced a syntax

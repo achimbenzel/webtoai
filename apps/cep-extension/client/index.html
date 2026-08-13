@@ -28,6 +28,28 @@
         </div>
       </section>
 
+      <section class="card" aria-labelledby="import-heading">
+        <h2 class="card__title" id="import-heading">Import</h2>
+        <p class="card__lead" id="import-status">Open a scene first.</p>
+        <div class="progress" id="progress" hidden>
+          <div class="progress__bar" id="progress-bar"></div>
+        </div>
+        <dl class="kv" id="import-info"></dl>
+        <details class="report" id="import-report" hidden>
+          <summary class="report__summary" id="import-report-summary">Report</summary>
+          <table class="report__table">
+            <tbody id="import-report-rows"></tbody>
+          </table>
+        </details>
+        <div class="actions">
+          <button class="btn btn--primary" id="import-scene" type="button" disabled>
+            Build document
+          </button>
+          <button class="btn" id="cancel-import" type="button" hidden>Cancel</button>
+          <button class="btn" id="export-report" type="button" hidden>Export report</button>
+        </div>
+      </section>
+
       <section class="card" aria-labelledby="host-heading">
         <h2 class="card__title" id="host-heading">Host</h2>
         <p class="card__lead" id="host-greeting">Connecting to Illustrator...</p>
