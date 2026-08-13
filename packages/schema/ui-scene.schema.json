@@ -37,7 +37,11 @@
               "minimum": 0
             }
           },
-          "required": ["w", "h", "dpr"]
+          "required": [
+            "w",
+            "h",
+            "dpr"
+          ]
         },
         "document": {
           "type": "object",
@@ -51,10 +55,19 @@
               "minimum": 0
             }
           },
-          "required": ["w", "h"]
+          "required": [
+            "w",
+            "h"
+          ]
         }
       },
-      "required": ["url", "title", "capturedAt", "viewport", "document"]
+      "required": [
+        "url",
+        "title",
+        "capturedAt",
+        "viewport",
+        "document"
+      ]
     },
     "options": {
       "type": "object",
@@ -120,7 +133,11 @@
           },
           "style": {
             "type": "string",
-            "enum": ["normal", "italic", "oblique"]
+            "enum": [
+              "normal",
+              "italic",
+              "oblique"
+            ]
           },
           "isWebFont": {
             "type": "boolean"
@@ -129,7 +146,12 @@
             "type": "string"
           }
         },
-        "required": ["family", "weight", "style", "isWebFont"]
+        "required": [
+          "family",
+          "weight",
+          "style",
+          "isWebFont"
+        ]
       }
     },
     "assets": {
@@ -143,7 +165,10 @@
           },
           "kind": {
             "type": "string",
-            "enum": ["raster", "svg"]
+            "enum": [
+              "raster",
+              "svg"
+            ]
           },
           "mime": {
             "type": "string"
@@ -169,14 +194,27 @@
             "type": "string"
           }
         },
-        "required": ["id", "kind", "mime", "width", "height"]
+        "required": [
+          "id",
+          "kind",
+          "mime",
+          "width",
+          "height"
+        ]
       }
     },
     "root": {
       "$ref": "#/$defs/__schema0"
     }
   },
-  "required": ["version", "source", "options", "fonts", "assets", "root"],
+  "required": [
+    "version",
+    "source",
+    "options",
+    "fonts",
+    "assets",
+    "root"
+  ],
   "$defs": {
     "__schema0": {
       "type": "object",
@@ -190,7 +228,13 @@
         },
         "role": {
           "type": "string",
-          "enum": ["box", "text", "image", "svg", "unsupported"]
+          "enum": [
+            "box",
+            "text",
+            "image",
+            "svg",
+            "unsupported"
+          ]
         },
         "frame": {
           "type": "object",
@@ -210,7 +254,12 @@
               "minimum": 0
             }
           },
-          "required": ["x", "y", "w", "h"]
+          "required": [
+            "x",
+            "y",
+            "w",
+            "h"
+          ]
         },
         "paint": {
           "type": "object",
@@ -248,10 +297,18 @@
                           "maximum": 1
                         }
                       },
-                      "required": ["r", "g", "b", "a"]
+                      "required": [
+                        "r",
+                        "g",
+                        "b",
+                        "a"
+                      ]
                     }
                   },
-                  "required": ["kind", "color"]
+                  "required": [
+                    "kind",
+                    "color"
+                  ]
                 },
                 {
                   "type": "object",
@@ -293,7 +350,12 @@
                                 "maximum": 1
                               }
                             },
-                            "required": ["r", "g", "b", "a"]
+                            "required": [
+                              "r",
+                              "g",
+                              "b",
+                              "a"
+                            ]
                           },
                           "offset": {
                             "type": "number",
@@ -301,11 +363,18 @@
                             "maximum": 1
                           }
                         },
-                        "required": ["color", "offset"]
+                        "required": [
+                          "color",
+                          "offset"
+                        ]
                       }
                     }
                   },
-                  "required": ["kind", "angle", "stops"]
+                  "required": [
+                    "kind",
+                    "angle",
+                    "stops"
+                  ]
                 },
                 {
                   "type": "object",
@@ -316,7 +385,10 @@
                     },
                     "shape": {
                       "type": "string",
-                      "enum": ["circle", "ellipse"]
+                      "enum": [
+                        "circle",
+                        "ellipse"
+                      ]
                     },
                     "center": {
                       "type": "object",
@@ -328,7 +400,10 @@
                           "type": "number"
                         }
                       },
-                      "required": ["x", "y"]
+                      "required": [
+                        "x",
+                        "y"
+                      ]
                     },
                     "radius": {
                       "type": "object",
@@ -340,7 +415,10 @@
                           "type": "number"
                         }
                       },
-                      "required": ["x", "y"]
+                      "required": [
+                        "x",
+                        "y"
+                      ]
                     },
                     "stops": {
                       "minItems": 2,
@@ -372,7 +450,12 @@
                                 "maximum": 1
                               }
                             },
-                            "required": ["r", "g", "b", "a"]
+                            "required": [
+                              "r",
+                              "g",
+                              "b",
+                              "a"
+                            ]
                           },
                           "offset": {
                             "type": "number",
@@ -380,11 +463,20 @@
                             "maximum": 1
                           }
                         },
-                        "required": ["color", "offset"]
+                        "required": [
+                          "color",
+                          "offset"
+                        ]
                       }
                     }
                   },
-                  "required": ["kind", "shape", "center", "radius", "stops"]
+                  "required": [
+                    "kind",
+                    "shape",
+                    "center",
+                    "radius",
+                    "stops"
+                  ]
                 }
               ]
             },
@@ -432,7 +524,12 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["r", "g", "b", "a"]
+                  "required": [
+                    "r",
+                    "g",
+                    "b",
+                    "a"
+                  ]
                 },
                 "style": {
                   "type": "string",
@@ -476,7 +573,12 @@
                           "maximum": 1
                         }
                       },
-                      "required": ["r", "g", "b", "a"]
+                      "required": [
+                        "r",
+                        "g",
+                        "b",
+                        "a"
+                      ]
                     },
                     {
                       "type": "object",
@@ -502,7 +604,12 @@
                           "maximum": 1
                         }
                       },
-                      "required": ["r", "g", "b", "a"]
+                      "required": [
+                        "r",
+                        "g",
+                        "b",
+                        "a"
+                      ]
                     },
                     {
                       "type": "object",
@@ -528,7 +635,12 @@
                           "maximum": 1
                         }
                       },
-                      "required": ["r", "g", "b", "a"]
+                      "required": [
+                        "r",
+                        "g",
+                        "b",
+                        "a"
+                      ]
                     },
                     {
                       "type": "object",
@@ -554,7 +666,12 @@
                           "maximum": 1
                         }
                       },
-                      "required": ["r", "g", "b", "a"]
+                      "required": [
+                        "r",
+                        "g",
+                        "b",
+                        "a"
+                      ]
                     }
                   ]
                 },
@@ -624,7 +741,11 @@
                   ]
                 }
               },
-              "required": ["widths", "color", "style"]
+              "required": [
+                "widths",
+                "color",
+                "style"
+              ]
             },
             "radius": {
               "type": "array",
@@ -688,10 +809,22 @@
                         "maximum": 1
                       }
                     },
-                    "required": ["r", "g", "b", "a"]
+                    "required": [
+                      "r",
+                      "g",
+                      "b",
+                      "a"
+                    ]
                   }
                 },
-                "required": ["inset", "offsetX", "offsetY", "blur", "spread", "color"]
+                "required": [
+                  "inset",
+                  "offsetX",
+                  "offsetY",
+                  "blur",
+                  "spread",
+                  "color"
+                ]
               }
             },
             "opacity": {
@@ -703,7 +836,10 @@
               "type": "string"
             }
           },
-          "required": ["radius", "opacity"]
+          "required": [
+            "radius",
+            "opacity"
+          ]
         },
         "text": {
           "type": "object",
@@ -729,7 +865,11 @@
                       },
                       "style": {
                         "type": "string",
-                        "enum": ["normal", "italic", "oblique"]
+                        "enum": [
+                          "normal",
+                          "italic",
+                          "oblique"
+                        ]
                       },
                       "isWebFont": {
                         "type": "boolean"
@@ -738,7 +878,12 @@
                         "type": "string"
                       }
                     },
-                    "required": ["family", "weight", "style", "isWebFont"]
+                    "required": [
+                      "family",
+                      "weight",
+                      "style",
+                      "isWebFont"
+                    ]
                   },
                   "size": {
                     "type": "number",
@@ -768,7 +913,12 @@
                         "maximum": 1
                       }
                     },
-                    "required": ["r", "g", "b", "a"]
+                    "required": [
+                      "r",
+                      "g",
+                      "b",
+                      "a"
+                    ]
                   },
                   "lineHeight": {
                     "type": "number",
@@ -779,11 +929,23 @@
                   },
                   "align": {
                     "type": "string",
-                    "enum": ["left", "right", "center", "justify", "start", "end"]
+                    "enum": [
+                      "left",
+                      "right",
+                      "center",
+                      "justify",
+                      "start",
+                      "end"
+                    ]
                   },
                   "decoration": {
                     "type": "string",
-                    "enum": ["none", "underline", "line-through", "overline"]
+                    "enum": [
+                      "none",
+                      "underline",
+                      "line-through",
+                      "overline"
+                    ]
                   }
                 },
                 "required": [
@@ -801,14 +963,23 @@
               "type": "boolean"
             }
           },
-          "required": ["runs", "isSingleLine"]
+          "required": [
+            "runs",
+            "isSingleLine"
+          ]
         },
         "assetId": {
           "type": "string"
         },
         "objectFit": {
           "type": "string",
-          "enum": ["fill", "contain", "cover", "none", "scale-down"]
+          "enum": [
+            "fill",
+            "contain",
+            "cover",
+            "none",
+            "scale-down"
+          ]
         },
         "objectPosition": {
           "type": "object",
@@ -820,7 +991,10 @@
               "type": "number"
             }
           },
-          "required": ["x", "y"]
+          "required": [
+            "x",
+            "y"
+          ]
         },
         "clip": {
           "type": "boolean"
@@ -843,11 +1017,20 @@
               "type": "number"
             }
           },
-          "required": ["x", "y"]
+          "required": [
+            "x",
+            "y"
+          ]
         },
         "cssPosition": {
           "type": "string",
-          "enum": ["static", "relative", "absolute", "fixed", "sticky"]
+          "enum": [
+            "static",
+            "relative",
+            "absolute",
+            "fixed",
+            "sticky"
+          ]
         },
         "stackingOrder": {
           "type": "integer",
@@ -867,7 +1050,16 @@
           }
         }
       },
-      "required": ["id", "name", "role", "frame", "paint", "clip", "stackingOrder", "children"]
+      "required": [
+        "id",
+        "name",
+        "role",
+        "frame",
+        "paint",
+        "clip",
+        "stackingOrder",
+        "children"
+      ]
     }
   }
 }

@@ -3,6 +3,7 @@ import type {
   CaptureEnv,
   DomElementLike,
   DomNodeLike,
+  DomTextLike,
   ImageInfo,
   RectLike,
   StyleLike,
@@ -86,6 +87,16 @@ export interface FakeSpec {
   before?: Record<string, string>;
   after?: Record<string, string>;
   children?: FakeSpec[];
+  /**
+   * Interleaved text and elements, in document order — the shape `text` plus
+   * `children` cannot express, because it always puts the text first.
+   *
+   * `<p>Als <span>freiberuflicher</span> Designer</p>` is the single most
+   * common paragraph on the web and its whitespace is entirely carried by the
+   * text nodes *between* the elements, so a harness that cannot build it
+   * cannot test the thing most likely to be wrong.
+   */
+  content?: Array<string | FakeTextSpec | FakeSpec>;
   /** For `<img>`. */
   image?: ImageInfo;
   /** For `<svg>`. */
@@ -102,9 +113,37 @@ class FakeStyle implements StyleLike {
   }
 }
 
+/** A text node with the geometry a `Range` would report for it. */
+export interface FakeTextSpec {
+  data: string;
+  /** Rect of the anonymous block box; null models a text node with no box. */
+  rect?: Partial<RectLike> | null;
+}
+
 interface FakeText extends DomNodeLike {
   nodeType: 3;
   data: string;
+  rect: RectLike | null;
+}
+
+function isTextSpec(part: string | FakeTextSpec | FakeSpec): part is FakeTextSpec {
+  return typeof part !== "string" && "data" in part;
+}
+
+function makeText(data: string, rect?: Partial<RectLike> | null): FakeText {
+  return {
+    nodeType: 3,
+    data,
+    rect:
+      rect === null
+        ? null
+        : {
+            x: rect?.x ?? 0,
+            y: rect?.y ?? 0,
+            width: rect?.width ?? 100,
+            height: rect?.height ?? 20,
+          },
+  };
 }
 
 export class FakeElement implements DomElementLike {
@@ -145,11 +184,15 @@ export class FakeElement implements DomElementLike {
     };
 
     if (spec.text !== undefined) {
-      const textNode: FakeText = { nodeType: 3, data: spec.text };
-      this.childNodes.push(textNode);
+      this.childNodes.push(makeText(spec.text));
     }
     for (const child of spec.children ?? []) {
       this.childNodes.push(new FakeElement(child));
+    }
+    for (const part of spec.content ?? []) {
+      if (typeof part === "string") this.childNodes.push(makeText(part));
+      else if (isTextSpec(part)) this.childNodes.push(makeText(part.data, part.rect));
+      else this.childNodes.push(new FakeElement(part));
     }
   }
 
@@ -207,6 +250,10 @@ export function createFakeEnv(spec: FakeSpec, options: FakeEnvOptions = {}): Cap
 
     getRect(element: DomElementLike): RectLike {
       return asFake(element).rect;
+    },
+
+    getTextRect(node: DomTextLike): RectLike | null {
+      return (node as unknown as FakeText).rect;
     },
 
     scroll: options.scroll ?? { x: 0, y: 0 },

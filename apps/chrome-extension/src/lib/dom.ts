@@ -87,6 +87,15 @@ export interface CaptureEnv {
   getComputedStyle(element: DomElementLike, pseudo?: string | null): StyleLike;
   /** Border-box rectangle, viewport-relative. */
   getRect(element: DomElementLike): RectLike;
+  /**
+   * Rectangle a text node actually occupies, viewport-relative, or null when
+   * it has no box.
+   *
+   * A text node has no `getBoundingClientRect` of its own, but a `Range` over
+   * it does — which is the only way to find the geometry of the anonymous
+   * block box the browser creates for text sitting next to a block sibling.
+   */
+  getTextRect(node: DomTextLike): RectLike | null;
   /** Scroll offset at capture time, added to rects to get document space. */
   readonly scroll: { x: number; y: number };
   readonly viewport: { w: number; h: number; dpr: number };

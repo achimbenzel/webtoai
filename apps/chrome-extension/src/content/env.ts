@@ -2,6 +2,7 @@ import type {
   CanvasCapture,
   CaptureEnv,
   DomElementLike,
+  DomTextLike,
   ImageInfo,
   RectLike,
   StyleLike,
@@ -79,6 +80,22 @@ export function createCaptureEnv(options: CreateEnvOptions): CaptureEnv {
 
     getRect(element: DomElementLike): RectLike {
       return toElement(element).getBoundingClientRect();
+    },
+
+    getTextRect(node: DomTextLike): RectLike | null {
+      // A Range is the only handle the DOM gives on a text node's geometry.
+      // Its rect is the union of the line boxes the text occupies, which is
+      // exactly the anonymous block box the browser laid out for it.
+      const range = document.createRange();
+      try {
+        range.selectNodeContents(node as unknown as Text);
+        const rect = range.getBoundingClientRect();
+        return rect.width === 0 && rect.height === 0 ? null : rect;
+      } catch {
+        return null;
+      } finally {
+        range.detach();
+      }
     },
 
     scroll: { x: window.scrollX, y: window.scrollY },

@@ -280,7 +280,7 @@ describe("loadSceneFile", () => {
     const summary = host.loadSceneFile("/scenes/page.web2ai.json");
     expect(summary.path).toBe("/scenes/page.web2ai.json");
     expect(summary.url).toContain("fixture://stacking");
-    expect(summary.nodeCount).toBe(15);
+    expect(summary.nodeCount).toBe(17);
     expect(summary.degraded).toBe(0);
   });
 

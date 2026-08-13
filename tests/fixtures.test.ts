@@ -83,8 +83,13 @@ describe("fixture: stacking", () => {
       "div.flow",
       "div.box.auto-positioned",
       "div.trap",
+      // The wrapper's own loose text, in the anonymous block box CSS gives it:
+      // in-flow content, so above the parent's background and below its
+      // positioned descendants (Appendix E steps 4 and 8).
+      "#text",
       "div.trap__inner",
       "div.passthrough",
+      "#text",
       "div.flow-stage",
       // Block, then float, then inline — CSS 2.1 Appendix E steps 4, 5, 7.
       "p",

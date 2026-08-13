@@ -326,6 +326,54 @@
             "stackingOrder": 5,
             "children": [
               {
+                "id": "nd90d1de7",
+                "name": "#text",
+                "role": "text",
+                "frame": {
+                  "x": 65,
+                  "y": 207,
+                  "w": 133.859,
+                  "h": 16
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "opacity: 0.99 wrapper",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 0,
+                        "g": 0,
+                        "b": 0,
+                        "a": 1
+                      },
+                      "lineHeight": 20,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                },
+                "clip": false,
+                "stackingOrder": 6,
+                "children": []
+              },
+              {
                 "id": "n42d5d03c",
                 "name": "div.trap__inner",
                 "role": "text",
@@ -354,7 +402,7 @@
                   }
                 },
                 "clip": false,
-                "stackingOrder": 6,
+                "stackingOrder": 7,
                 "children": [],
                 "cssPosition": "absolute",
                 "text": {
@@ -415,8 +463,56 @@
               }
             },
             "clip": false,
-            "stackingOrder": 7,
+            "stackingOrder": 8,
             "children": [
+              {
+                "id": "nb22c80a7",
+                "name": "#text",
+                "role": "text",
+                "frame": {
+                  "x": 405,
+                  "y": 227,
+                  "w": 84.063,
+                  "h": 16
+                },
+                "paint": {
+                  "radius": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                "text": {
+                  "runs": [
+                    {
+                      "chars": "plain wrapper",
+                      "font": {
+                        "family": "Arial",
+                        "weight": 400,
+                        "style": "normal",
+                        "isWebFont": false,
+                        "stack": "Arial, sans-serif"
+                      },
+                      "size": 14,
+                      "color": {
+                        "r": 0,
+                        "g": 0,
+                        "b": 0,
+                        "a": 1
+                      },
+                      "lineHeight": 20,
+                      "letterSpacing": 0,
+                      "align": "start"
+                    }
+                  ],
+                  "isSingleLine": true
+                },
+                "clip": false,
+                "stackingOrder": 9,
+                "children": []
+              },
               {
                 "id": "ne22ce0fd",
                 "name": "div.passthrough__escapee",
@@ -446,7 +542,7 @@
                   }
                 },
                 "clip": false,
-                "stackingOrder": 14,
+                "stackingOrder": 16,
                 "children": [],
                 "cssPosition": "absolute",
                 "text": {
@@ -507,7 +603,7 @@
               }
             },
             "clip": false,
-            "stackingOrder": 12,
+            "stackingOrder": 14,
             "children": [],
             "cssPosition": "absolute",
             "text": {
@@ -565,7 +661,7 @@
               }
             },
             "clip": false,
-            "stackingOrder": 13,
+            "stackingOrder": 15,
             "children": [],
             "cssPosition": "absolute",
             "text": {
@@ -641,7 +737,7 @@
           }
         },
         "clip": false,
-        "stackingOrder": 8,
+        "stackingOrder": 10,
         "children": [
           {
             "id": "nea248afd",
@@ -663,7 +759,7 @@
               "opacity": 1
             },
             "clip": false,
-            "stackingOrder": 9,
+            "stackingOrder": 11,
             "children": [],
             "text": {
               "runs": [
@@ -720,7 +816,7 @@
               }
             },
             "clip": false,
-            "stackingOrder": 10,
+            "stackingOrder": 12,
             "children": [],
             "text": {
               "runs": [
@@ -777,7 +873,7 @@
               }
             },
             "clip": false,
-            "stackingOrder": 11,
+            "stackingOrder": 13,
             "children": [],
             "text": {
               "runs": [

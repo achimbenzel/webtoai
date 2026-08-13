@@ -26,7 +26,7 @@ import { CaptureLog } from "./log.ts";
 import { deduplicateNames, nodeId, nodeName } from "./naming.ts";
 import type { StackingInput } from "./stacking.ts";
 import { paintOrderIndex } from "./stacking.ts";
-import { extractText, pseudoRun } from "./text.ts";
+import { anonymousText, extractText, orphanedTextNodes, pseudoRun } from "./text.ts";
 
 export interface WalkResult {
   /** Complete except for `assets`, which the async pass fills in. */
@@ -100,6 +100,32 @@ function toCssPosition(value: string): CssPosition {
       return "static";
   }
 }
+
+/**
+ * The stacking properties of an anonymous block box.
+ *
+ * CSS gives anonymous boxes no properties of their own: they cannot be
+ * positioned, cannot take a z-index and never establish a stacking context, so
+ * they paint in flow, in document order. Everything here is a CSS initial
+ * value; only `id` and `parentDisplay` vary.
+ */
+const ANONYMOUS_STACKING: Omit<StackingInput, "id" | "parentDisplay" | "children"> = {
+  display: "block",
+  position: "static",
+  zIndex: "auto",
+  opacity: "1",
+  transform: "none",
+  filter: "none",
+  backdropFilter: "none",
+  mixBlendMode: "normal",
+  isolation: "auto",
+  willChange: "auto",
+  contain: "none",
+  clipPath: "none",
+  mask: "none",
+  perspective: "none",
+  float: "none",
+};
 
 function readStackingInput(id: string, style: StyleLike, parentDisplay: string): StackingInput {
   const get = (property: string): string => style.getPropertyValue(property);
@@ -495,6 +521,7 @@ class Walker {
 
     if (!LEAF_ELEMENTS.has(tag)) {
       this.visitChildren(element, node, stack, path, depth, style);
+      this.visitAnonymousText(element, node, stack, path, style, reasons);
     }
     if (this.options.capturePseudoElements) {
       this.visitPseudoElements(element, style, node, stack, frame, name);
@@ -536,6 +563,73 @@ class Walker {
       if (childBuilt === null) return;
       node.children.push(childBuilt.node);
       stack.children.push(childBuilt.stack);
+    });
+  }
+
+  /**
+   * Emits the anonymous block boxes CSS creates for bare text.
+   *
+   * `<div>opacity wrapper<div class="inner">…</div></div>` lays out the loose
+   * text in a box of its own, and the walker — which descends only into
+   * element children — used to drop it entirely and silently. That is not a
+   * rare shape; it is most of the prose on a page built out of nested divs.
+   *
+   * The geometry is real, not guessed: a `Range` over the text node reports
+   * the line boxes the browser actually laid out. Where the environment cannot
+   * provide it the text is still lost, and then it is reported.
+   */
+  private visitAnonymousText(
+    element: DomElementLike,
+    node: SceneNode,
+    stack: StackingInput,
+    path: readonly number[],
+    style: StyleLike,
+    reasons: string[],
+  ): void {
+    const textNodes = orphanedTextNodes(element);
+    if (textNodes.length === 0) return;
+
+    textNodes.forEach((textNode, index) => {
+      // Negative indices keep these paths from ever colliding with an element
+      // child's, so adding them leaves every existing node id untouched.
+      const childPath = [...path, -1 - index];
+      const rect = this.env.getTextRect(textNode);
+      if (rect === null) {
+        this.log.warn(
+          "text-anonymous-box-unmeasurable",
+          node.name,
+          textNode.data.trim().slice(0, 40),
+        );
+        reasons.push("text-outside-inline-context");
+        return;
+      }
+
+      const frame = this.frameFor(rect);
+      const text = anonymousText(style, textNode.data, this.env, { h: frame.h });
+      if (text === null) return;
+
+      const textNodeScene: SceneNode = {
+        id: nodeId(childPath, `${node.name}/#text`),
+        name: "#text",
+        role: "text",
+        frame,
+        paint: { radius: [0, 0, 0, 0], opacity: 1 },
+        text,
+        clip: false,
+        stackingOrder: 0,
+        children: [],
+      };
+      this.recordFonts(textNodeScene);
+
+      node.children.push(textNodeScene);
+      // An anonymous box is in flow and can never be positioned or establish a
+      // stacking context, so it paints exactly where its order says.
+      stack.children.push({
+        ...ANONYMOUS_STACKING,
+        id: textNodeScene.id,
+        parentDisplay: style.getPropertyValue("display"),
+        children: [],
+      });
     });
   }
 

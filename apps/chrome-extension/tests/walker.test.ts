@@ -314,6 +314,203 @@ describe("walker — text", () => {
     ]);
   });
 
+  it("keeps the spaces between interleaved text and inline elements", () => {
+    // The paragraph shape that is everywhere, with the spaces living in the
+    // text nodes *between* the elements. Lose them and every word in the
+    // paragraph runs into the next.
+    const { scene } = capture({
+      tag: "p",
+      rect: { width: 600, height: 20 },
+      style: { "line-height": "20px" },
+      content: [
+        "Als ",
+        { tag: "strong", text: "freiberuflicher Designer", style: { display: "inline" } },
+        " entwickle ",
+        { tag: "em", text: "ich", style: { display: "inline" } },
+        " Websites.",
+      ],
+    });
+    expect(scene.root.text?.runs.map((run) => run.chars).join("")).toBe(
+      "Als freiberuflicher Designer entwickle ich Websites.",
+    );
+  });
+
+  it("keeps one space where markup put a newline on both sides of a tag", () => {
+    // Pretty-printed HTML puts a newline before and after the inline element;
+    // the browser renders exactly one space, not two.
+    const { scene } = capture({
+      tag: "p",
+      rect: { width: 600, height: 20 },
+      style: { "line-height": "20px" },
+      content: [
+        "\n      Als\n      ",
+        { tag: "span", text: "freiberuflicher", style: { display: "inline" } },
+        "\n      Designer\n    ",
+      ],
+    });
+    expect(scene.root.text?.runs.map((run) => run.chars).join("")).toBe(
+      "Als freiberuflicher Designer",
+    );
+  });
+
+  it("flattens a whole inline subtree, keeping the text between the tags", () => {
+    // One level of nesting used to be the limit: anything deeper was walked as
+    // a box, and the bare text nodes then had nowhere to go and were dropped
+    // without a word. This paragraph came out as the four words in the <em>.
+    const { scene } = capture({
+      tag: "p",
+      rect: { width: 600, height: 20 },
+      style: { "line-height": "20px" },
+      content: [
+        "Als ",
+        {
+          tag: "span",
+          style: { display: "inline" },
+          children: [
+            {
+              tag: "em",
+              text: "freiberuflicher Designer",
+              style: { display: "inline", "font-style": "italic" },
+            },
+          ],
+        },
+        " entwickle ich Websites.",
+      ],
+    });
+    expect(scene.root.role).toBe("text");
+    expect(scene.root.text?.runs.map((run) => run.chars).join("")).toBe(
+      "Als freiberuflicher Designer entwickle ich Websites.",
+    );
+    expect(scene.root.text?.runs.map((run) => run.font.style)).toEqual([
+      "normal",
+      "italic",
+      "normal",
+    ]);
+  });
+
+  it("descends through display: contents, which has no box at all", () => {
+    const { scene } = capture({
+      tag: "p",
+      rect: { width: 600, height: 20 },
+      style: { "line-height": "20px" },
+      content: [
+        "before ",
+        { tag: "div", text: "inside", style: { display: "contents" } },
+        " after",
+      ],
+    });
+    expect(scene.root.text?.runs.map((run) => run.chars).join("")).toBe("before inside after");
+  });
+
+  it("merges neighbouring runs that a wrapper element did not actually restyle", () => {
+    // Animation hooks and link wrappers produce a piece per element even when
+    // nothing changes; each one costs the renderer a per-character pass. The
+    // styles are spelled out on every element because the fake DOM has no
+    // inheritance — in a browser these three would compute the same anyway.
+    const inline = { display: "inline", "line-height": "20px" };
+    const { scene } = capture({
+      tag: "p",
+      rect: { width: 600, height: 20 },
+      style: { "line-height": "20px" },
+      content: [
+        "one ",
+        { tag: "span", text: "two ", style: inline },
+        { tag: "span", text: "three", style: inline },
+      ],
+    });
+    expect(scene.root.text?.runs).toHaveLength(1);
+    expect(scene.root.text?.runs[0]?.chars).toBe("one two three");
+  });
+
+  it("collapses whitespace across tag boundaries, not once per piece", () => {
+    // Pretty-printed markup puts a newline on both sides of the tag. Collapsing
+    // per piece leaves two spaces; the browser renders one.
+    const { scene } = capture({
+      tag: "p",
+      rect: { width: 600, height: 20 },
+      style: { "line-height": "20px" },
+      content: [
+        "Als\n  ",
+        { tag: "span", text: "\n  freiberuflicher\n  ", style: { display: "inline" } },
+        "\n  Designer",
+      ],
+    });
+    expect(scene.root.text?.runs.map((run) => run.chars).join("")).toBe(
+      "Als freiberuflicher Designer",
+    );
+  });
+
+  it("reports the paint an inline element loses when it is folded into a run", () => {
+    const { scene } = capture({
+      tag: "p",
+      rect: { width: 600, height: 20 },
+      style: { "line-height": "20px" },
+      content: [
+        "a ",
+        {
+          tag: "mark",
+          text: "highlighted",
+          style: { display: "inline", "background-color": "rgb(255, 240, 0)" },
+        },
+      ],
+    });
+    expect(scene.root.role).toBe("text");
+    expect(scene.root.unsupportedReasons).toContain("inline-paint-dropped");
+  });
+
+  it("keeps the text around an inline image, which cannot be folded into a run", () => {
+    // A replaced element has its own size and paint, so the paragraph has to
+    // be a box. The text either side then has no element node to live in — it
+    // is laid out in an anonymous block box, and that is what it becomes.
+    const { scene } = capture({
+      tag: "p",
+      style: filled,
+      rect: { width: 600, height: 20 },
+      content: [
+        { data: "Read the ", rect: { x: 0, y: 0, width: 60, height: 20 } },
+        { tag: "img", image: { src: "/icon.png", width: 16, height: 16 } },
+        { data: " docs.", rect: { x: 76, y: 0, width: 40, height: 20 } },
+      ],
+    });
+    expect(scene.root.role).toBe("box");
+    const text = scene.root.children.filter((child) => child.role === "text");
+    expect(text.map((child) => child.text?.runs[0]?.chars)).toEqual(["Read the", "docs."]);
+    // Real geometry, from a Range over the text node — not the parent's box.
+    expect(text[0]?.frame).toEqual({ x: 0, y: 0, w: 60, h: 20 });
+    expect(text[1]?.frame).toEqual({ x: 76, y: 0, w: 40, h: 20 });
+  });
+
+  it("keeps bare text sitting next to a block child", () => {
+    // `<div>label<div>…</div></div>` — the shape that made a whole paragraph
+    // disappear, because the walker only ever descended into element children.
+    const { scene } = capture({
+      tag: "div",
+      style: filled,
+      rect: { width: 400, height: 200 },
+      content: [
+        { data: "opacity: 0.99 wrapper", rect: { x: 8, y: 8, width: 200, height: 20 } },
+        { tag: "div", className: "inner", style: filled, rect: { y: 30 } },
+      ],
+    });
+    expect(names(scene.root)).toEqual(["div", "div.inner", "#text"]);
+    const text = findByName(scene.root, "#text");
+    expect(text?.text?.runs[0]?.chars).toBe("opacity: 0.99 wrapper");
+    expect(text?.frame).toEqual({ x: 8, y: 8, w: 200, h: 20 });
+  });
+
+  it("reports the loss when the anonymous box cannot be measured", () => {
+    const { scene } = capture({
+      tag: "div",
+      style: filled,
+      content: [
+        { data: "unmeasurable", rect: null },
+        { tag: "div", className: "inner", style: filled },
+      ],
+    });
+    expect(findByName(scene.root, "#text")).toBeUndefined();
+    expect(scene.root.unsupportedReasons).toContain("text-outside-inline-context");
+  });
+
   it("refuses to flatten a block child into text", () => {
     const { scene } = capture({
       tag: "div",
@@ -322,7 +519,10 @@ describe("walker — text", () => {
       children: [{ tag: "div", className: "block", style: filled }],
     });
     expect(scene.root.role).toBe("box");
-    expect(names(scene.root)).toEqual(["div", "div.block"]);
+    // The block child forces a box; "loose text" is not folded into it, but it
+    // is not dropped either — it becomes the anonymous box CSS laid out for it.
+    expect(names(scene.root)).toEqual(["div", "div.block", "#text"]);
+    expect(findByName(scene.root, "#text")?.text?.runs[0]?.chars).toBe("loose text");
   });
 
   it("collapses whitespace unless white-space preserves it", () => {
