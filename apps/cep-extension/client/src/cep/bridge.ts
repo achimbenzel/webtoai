@@ -137,6 +137,60 @@ export async function callHost<T>(
   return envelope.value;
 }
 
+export type HostLoadResult =
+  | { state: "already-loaded" }
+  | { state: "loaded" }
+  | { state: "missing"; path: string }
+  | { state: "error"; message: string; line: string };
+
+/**
+ * Makes sure the ExtendScript host is actually in the engine.
+ *
+ * The manifest's `ScriptPath` is supposed to load it, but that is not something
+ * to depend on: it runs once at panel creation, and if it fails there is no
+ * report of any kind — every later call just answers "web2ai is undefined".
+ * Loading the file explicitly is both a guarantee and a diagnostic, because
+ * `$.evalFile` throws a real error with a line number when the source is bad.
+ *
+ * Safe to call repeatedly; it checks before it loads.
+ */
+export async function ensureHostLoaded(scriptPath: string): Promise<HostLoadResult> {
+  if ((await evalScriptRaw("typeof web2ai")) === "object") {
+    return { state: "already-loaded" };
+  }
+
+  const literal = toExtendScriptLiteral(scriptPath);
+  const source = `(function () {
+    try {
+      var f = new File(${literal});
+      if (!f.exists) { return "missing"; }
+      $.evalFile(f);
+      return (typeof web2ai === "object") ? "loaded" : "silent";
+    } catch (e) {
+      return "error\\n" + (e.message ? e.message : String(e)) + "\\n" + (e.line ? e.line : "?");
+    }
+  })()`;
+
+  const raw = await evalScriptRaw(source);
+  const [state = "", message = "", line = "?"] = raw.split("\n");
+
+  if (state === "loaded") return { state: "loaded" };
+  if (state === "missing") return { state: "missing", path: scriptPath };
+  if (state === "error") return { state: "error", message, line };
+  if (state === "silent") {
+    return {
+      state: "error",
+      message: "The host file was evaluated but defined no web2ai namespace.",
+      line: "?",
+    };
+  }
+  return {
+    state: "error",
+    message: `Unexpected reply from the host: ${raw.slice(0, 200)}`,
+    line: "?",
+  };
+}
+
 export function hostEnvironment(): HostEnvironment | undefined {
   const cep = getCep();
   if (cep === undefined) return undefined;

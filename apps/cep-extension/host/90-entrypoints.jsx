@@ -76,7 +76,7 @@ web2ai.tempFolder = function () {
  */
 web2ai.openScene = function () {
   return web2ai.safeCall(function () {
-    var file = File.openDialog("Select a web2ai scene", "web2ai scene:*.json;All files:*.*", false);
+    var file = web2ai.chooseSceneFile();
     if (file === null) {
       return { cancelled: true };
     }
@@ -85,6 +85,33 @@ web2ai.openScene = function () {
     summary.cancelled = false;
     return summary;
   });
+};
+
+/**
+ * Opens a file dialog for a scene.
+ *
+ * The filter argument of File.openDialog is platform specific -- Windows takes
+ * a "Label:*.ext" string, macOS ignores a string entirely and wants a callback
+ * -- and a filter the platform dislikes can make the dialog fail rather than
+ * merely show too much. So the filtered call is attempted and the unfiltered
+ * one is the fallback: showing every file beats showing no dialog.
+ *
+ * @returns {File|null} null when the user cancelled
+ */
+web2ai.chooseSceneFile = function () {
+  var prompt = "Select a web2ai scene (.web2ai.json)";
+
+  // es3-ok: String.prototype.indexOf, which ES3 does have.
+  if ($.os && String($.os).indexOf("Windows") !== -1) {
+    try {
+      return File.openDialog(prompt, "web2ai scene:*.json,All files:*.*", false);
+    } catch (dialogError) {
+      // Fall through to the plain dialog below.
+      $.writeln("web2ai: filtered file dialog failed, falling back (" + dialogError + ")");
+    }
+  }
+
+  return File.openDialog(prompt);
 };
 
 /**

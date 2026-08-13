@@ -2,6 +2,7 @@ import {
   SystemPath,
   callHost,
   cepApiVersion,
+  ensureHostLoaded,
   hostEnvironment,
   isCepAvailable,
   systemPath,
@@ -83,6 +84,34 @@ function extensionRoot(): string {
   }
 }
 
+/** Cached so the panel does not re-probe the engine on every button press. */
+let hostReady = false;
+
+/**
+ * Guarantees the host is loaded, and turns a failure into something readable.
+ *
+ * Relying on the manifest's ScriptPath alone means any failure surfaces as
+ * "web2ai is undefined" at the first call, with nothing about the cause.
+ */
+async function prepareHost(root: string): Promise<void> {
+  if (hostReady) return;
+
+  const result = await ensureHostLoaded(`${root}/jsx/host.jsx`);
+  switch (result.state) {
+    case "already-loaded":
+    case "loaded":
+      hostReady = true;
+      return;
+    case "missing":
+      throw new Error(
+        `The host script is missing at ${result.path}. Rebuild and reinstall: ` +
+          `pnpm --filter @web2ai/cep-extension build && pnpm dev:install`,
+      );
+    case "error":
+      throw new Error(`The host script failed to load (line ${result.line}): ${result.message}`);
+  }
+}
+
 async function refreshHost(): Promise<void> {
   const greeting = el("host-greeting");
   const info = el("host-info");
@@ -99,7 +128,9 @@ async function refreshHost(): Promise<void> {
 
   const env = hostEnvironment();
   try {
-    const hello = await callHost<HostHello>("hello", [extensionRoot()]);
+    const root = extensionRoot();
+    await prepareHost(root);
+    const hello = await callHost<HostHello>("hello", [root]);
     setLead(greeting, `Hello from ${hello.app} ${hello.appVersion}.`, "ok");
     renderKeyValues(info, [
       ["Host bundle", `v${hello.version} (ui-scene@${hello.schemaVersion})`],
@@ -159,6 +190,7 @@ async function openScene(): Promise<void> {
 
   button.disabled = true;
   try {
+    await prepareHost(extensionRoot());
     const summary = await callHost<SceneSummary>("openScene");
     if (summary.cancelled) {
       setLead(status, "No scene loaded.", "none");

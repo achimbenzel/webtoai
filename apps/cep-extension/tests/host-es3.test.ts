@@ -35,6 +35,22 @@ describe("ExtendScript host is ES3", () => {
     expect(() => parse(source, { ecmaVersion: 3, sourceType: "script" })).not.toThrow();
   });
 
+  it("the concatenated bundle parses as ES3", () => {
+    // Checking the sources one by one is not the same as checking what ships:
+    // concatenation is where a file that does not end cleanly can run into the
+    // next one. This asserts the artefact, assembled exactly as the build does.
+    const bundle = [
+      readFileSync(join(hostDir, "lib", "json2.js"), "utf8"),
+      ...hostSources().map((name) => readFileSync(join(hostDir, name), "utf8")),
+    ].join("\n\n");
+
+    expect(() => parse(bundle, { ecmaVersion: 3, sourceType: "script" })).not.toThrow();
+    // The namespace has to survive concatenation, or every host call answers
+    // "web2ai is undefined" with nothing to say about why.
+    expect(bundle).toContain("web2ai.hello =");
+    expect(bundle).toContain("web2ai.openScene =");
+  });
+
   it.each(hostSources())("%s is pure ASCII", (name) => {
     // ExtendScript reads .jsx as ASCII unless told otherwise. A stray em dash
     // in a comment is enough to mis-decode, and a single decode error takes
@@ -51,19 +67,27 @@ describe("ExtendScript host is ES3", () => {
       [/\.forEach\s*\(/, "Array.prototype.forEach"],
       [/\.map\s*\(\s*function/, "Array.prototype.map"],
       [/\.filter\s*\(\s*function/, "Array.prototype.filter"],
+      // String.prototype.indexOf is ES3 and fine; the array one is not. They
+      // are indistinguishable by regex, so a line that legitimately uses the
+      // string form marks itself with `es3-ok`.
       [/\.indexOf\s*\(/, "Array.prototype.indexOf (use web2ai.indexOf)"],
       [/\.trim\s*\(\s*\)/, "String.prototype.trim (use web2ai.trim)"],
       [/Object\.keys\s*\(/, "Object.keys"],
       [/Array\.isArray\s*\(/, "Array.isArray"],
-      [/\bJSON\.parse\s*\(/, ""], // allowed: json2.js provides JSON
     ];
 
     for (const name of hostSources()) {
-      const source = readFileSync(join(hostDir, name), "utf8");
-      for (const [pattern, label] of banned) {
-        if (label === "") continue;
-        expect(pattern.test(source), `${name} uses ${label}`).toBe(false);
-      }
+      const lines = readFileSync(join(hostDir, name), "utf8").split("\n");
+      lines.forEach((line, index) => {
+        // The marker is written as a comment, which sits on the line above.
+        const previous = lines[index - 1] ?? "";
+        if (line.includes("es3-ok") || previous.includes("es3-ok")) return;
+        for (const [pattern, label] of banned) {
+          expect(pattern.test(line), `${name}:${index + 1} uses ${label}\n  ${line.trim()}`).toBe(
+            false,
+          );
+        }
+      });
     }
   });
 });
