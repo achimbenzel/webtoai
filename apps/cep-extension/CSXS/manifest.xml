@@ -25,7 +25,7 @@
           <MainPath>./index.html</MainPath>
           <!-- host.jsx is auto-loaded into the ExtendScript engine -->
           <ScriptPath>./jsx/host.jsx</ScriptPath>
-          <!-- build --enable-node fills this in; see docs/ARCHITECTURE.md -->
+          <!-- filled in by the build when Node is enabled; see docs/ARCHITECTURE.md -->
           <CEFCommandLine/>
         </Resources>
         <Lifecycle>

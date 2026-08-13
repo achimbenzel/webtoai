@@ -101,6 +101,38 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.report__summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-top: 6px;
+}
+
+.report__table {
+  width: 100%;
+  margin-top: 6px;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.report__table td {
+  padding: 2px 0;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.report__table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-muted);
+}
+
 .panel__footer {
   margin-top: auto;
   display: flex;
@@ -119,6 +151,22 @@ body {
 
 .btn:hover {
   background: #545454;
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn--primary:hover {
+  background: #5aa9ee;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
 }
 
 .btn:focus-visible {

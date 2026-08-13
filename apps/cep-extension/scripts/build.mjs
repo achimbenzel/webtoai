@@ -113,6 +113,19 @@ function buildManifest() {
       )
     : source;
 
+  // A double hyphen inside an XML comment is illegal, and the failure is
+  // brutal: the comment ends early, the remainder of the file is parsed as
+  // markup, the manifest is invalid, and CEP drops the extension in silence.
+  // Writing "--enable-node" into a comment is an easy way to do it by accident.
+  for (const match of manifest.matchAll(/<!--([\s\S]*?)-->/g)) {
+    if ((match[1] ?? "").includes("--")) {
+      throw new Error(
+        `Illegal "--" inside an XML comment in CSXS/manifest.xml:\n  <!--${match[1]?.trim()}-->\n` +
+          `XML forbids it; the manifest would be invalid and CEP would ignore the extension.`,
+      );
+    }
+  }
+
   mkdirSync(join(distDir, "CSXS"), { recursive: true });
   writeFileSync(join(distDir, "CSXS", "manifest.xml"), manifest, "utf8");
   log(`CSXS/manifest.xml written (Node ${enableNode ? "enabled" : "disabled"})`);

@@ -69,22 +69,44 @@ web2ai.readJsonFile = function (path) {
 };
 
 /**
- * Absolute path of the folder this host script lives in (dist/jsx).
- * $.fileName is the currently executing script.
+ * Absolute path of the extension root, as told to us by the panel.
  *
- * @returns {string}
+ * $.fileName is NOT usable here. For a script loaded through the manifest's
+ * ScriptPath, ExtendScript reports the host application's own executable
+ * rather than the script -- deriving a path from it lands somewhere inside
+ * "Adobe Illustrator 2025/Support Files/Contents" and every config read fails.
+ *
+ * Only the panel knows the real location, via CEP's getSystemPath(EXTENSION),
+ * so it passes it in through web2ai.hello() before anything else runs.
+ *
+ * @type {string}
  */
-web2ai.hostFolder = function () {
-  return File($.fileName).parent.fsName;
+web2ai._extensionRoot = "";
+
+/**
+ * @param {string} path Absolute path of the folder containing CSXS/.
+ * @returns {string} the path that was stored
+ */
+web2ai.setExtensionRoot = function (path) {
+  if (path && String(path).length > 0) {
+    web2ai._extensionRoot = String(path).replace(/[\\/]+$/, "");
+    // A different extension root invalidates anything cached from the old one.
+    web2ai._config = null;
+    web2ai._fontMap = null;
+  }
+  return web2ai._extensionRoot;
 };
 
 /**
- * Absolute path of the extension root (the folder containing CSXS/).
- *
  * @returns {string}
  */
 web2ai.extensionRoot = function () {
-  return File($.fileName).parent.parent.fsName;
+  if (web2ai._extensionRoot.length === 0) {
+    throw new Error(
+      "Extension root unknown -- the panel must call web2ai.hello(root) before reading config."
+    );
+  }
+  return web2ai._extensionRoot;
 };
 
 /**

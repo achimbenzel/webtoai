@@ -13,6 +13,21 @@
         <span class="panel__version" id="panel-version"></span>
       </header>
 
+      <section class="card" aria-labelledby="scene-heading">
+        <h2 class="card__title" id="scene-heading">Scene</h2>
+        <p class="card__lead" id="scene-status">No scene loaded.</p>
+        <dl class="kv" id="scene-info"></dl>
+        <details class="report" id="scene-report" hidden>
+          <summary class="report__summary" id="scene-report-summary">Report</summary>
+          <table class="report__table">
+            <tbody id="scene-report-rows"></tbody>
+          </table>
+        </details>
+        <div class="actions">
+          <button class="btn btn--primary" id="open-scene" type="button">Open scene file...</button>
+        </div>
+      </section>
+
       <section class="card" aria-labelledby="host-heading">
         <h2 class="card__title" id="host-heading">Host</h2>
         <p class="card__lead" id="host-greeting">Connecting to Illustrator...</p>
@@ -22,7 +37,8 @@
       <section class="card" aria-labelledby="transport-heading">
         <h2 class="card__title" id="transport-heading">Transport</h2>
         <p class="card__lead" id="transport-status">
-          Not started -- the local receiver arrives in milestone 2.
+          Not started -- the local receiver arrives in milestone 2. Until then, capture a page with
+          the Chrome extension and open the downloaded .web2ai.json above.
         </p>
       </section>
 

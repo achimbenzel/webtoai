@@ -10,13 +10,19 @@
 var web2ai = typeof web2ai === "undefined" ? {} : web2ai;
 
 /**
- * Milestone 0 handshake. Proves the host bundle parsed (i.e. it is valid ES3),
- * json2.js is present, and the config files were copied into the extension.
+ * Handshake, and the point at which the host learns where it lives.
  *
+ * The extension root has to come from the panel: a script loaded through the
+ * manifest's ScriptPath cannot work it out from $.fileName, which reports the
+ * host application instead. See host/10-io.jsx.
+ *
+ * @param {string} extensionRoot Absolute path of the folder containing CSXS/.
  * @returns {string} JSON envelope
  */
-web2ai.hello = function () {
+web2ai.hello = function (extensionRoot) {
   return web2ai.safeCall(function () {
+    web2ai.setExtensionRoot(extensionRoot);
+
     var config = null;
     var configError = "";
     try {
@@ -24,6 +30,7 @@ web2ai.hello = function () {
     } catch (e) {
       configError = String(e.message ? e.message : e);
     }
+
     return {
       host: "web2ai",
       version: web2ai.VERSION,
@@ -32,11 +39,13 @@ web2ai.hello = function () {
       appVersion: app.version,
       locale: $.locale,
       engine: $.engineName,
-      extensionRoot: web2ai.extensionRoot(),
+      extensionRoot: web2ai._extensionRoot,
       jsonAvailable: typeof JSON !== "undefined" && typeof JSON.stringify === "function",
       configLoaded: config !== null,
       configError: configError,
-      renderMaxLayerDepth: config ? config.render.maxLayerDepth : -1
+      renderMaxLayerDepth: config ? config.render.maxLayerDepth : -1,
+      sceneLoaded: web2ai._scene !== null,
+      scenePath: web2ai._scenePath
     };
   });
 };
@@ -54,5 +63,41 @@ web2ai.tempFolder = function () {
       folder.create();
     }
     return folder.fsName;
+  });
+};
+
+/**
+ * Opens a file dialog and loads the chosen scene.
+ *
+ * The dialog lives on this side because the panel has no filesystem access
+ * without Node, and because a scene must never travel through evalScript.
+ *
+ * @returns {string} JSON envelope; {cancelled:true} when the user backed out
+ */
+web2ai.openScene = function () {
+  return web2ai.safeCall(function () {
+    var file = File.openDialog("Select a web2ai scene", "web2ai scene:*.json;All files:*.*", false);
+    if (file === null) {
+      return { cancelled: true };
+    }
+
+    var summary = web2ai.loadSceneFile(file.fsName);
+    summary.cancelled = false;
+    return summary;
+  });
+};
+
+/**
+ * Loads a scene from a known path, without a dialog. This is the entry point
+ * the transport server will use once it lands.
+ *
+ * @param {string} path
+ * @returns {string} JSON envelope
+ */
+web2ai.loadScene = function (path) {
+  return web2ai.safeCall(function () {
+    var summary = web2ai.loadSceneFile(path);
+    summary.cancelled = false;
+    return summary;
   });
 };
