@@ -38,17 +38,31 @@ pnpm build
 pnpm dev:install
 ```
 
-This symlinks `apps/cep-extension/dist` into your per-user CEP extensions
-directory and enables `PlayerDebugMode` so Illustrator will load an unsigned
-panel:
+On Windows, install a copy rather than a link — CEP's scanner does not reliably
+follow reparse points:
+
+```bash
+pnpm dev:install --copy
+```
+
+This places `apps/cep-extension/dist` in your per-user CEP extensions directory
+and enables `PlayerDebugMode` so Illustrator will load an unsigned panel:
 
 |         |                                                                                                              |
 | ------- | ------------------------------------------------------------------------------------------------------------ |
 | macOS   | `~/Library/Application Support/Adobe/CEP/extensions/` + `defaults write com.adobe.CSXS.11 PlayerDebugMode 1` |
 | Windows | `%APPDATA%\Adobe\CEP\extensions\` + `HKCU\Software\Adobe\CSXS.11` → `PlayerDebugMode = 1`                    |
 
-Then restart Illustrator and open **Window ▸ Extensions ▸ web2ai**. Remote
-debugging is available at <http://localhost:8088> while the panel is open.
+Then restart Illustrator and open **Window ▸ Extensions ▸ web2ai**.
+
+Two things are **off by default**, because both are among the handful of
+differences that can stop CEP from listing a panel at all, and having them as
+one-flag rebuilds makes them quick to rule out:
+
+```bash
+pnpm --filter @web2ai/cep-extension build -- --enable-node   # Node inside the panel (milestone 2 needs this)
+pnpm --filter @web2ai/cep-extension build -- --debug-file    # remote debugging on http://localhost:8088
+```
 
 `pnpm dev:install --uninstall` removes the link. `--copy` installs a copy
 instead of a symlink; `--csxs=11,12,13` targets other CEP runtimes.
@@ -87,9 +101,12 @@ The three usual causes, in order of how often they bite:
    else. Declaring a CSXS revision higher than the host reports drops the
    extension silently. web2ai declares 9.0 for that reason; the Illustrator
    version requirement is carried by the `<Host>` range instead.
-5. **The `.debug` file.** CEP's reader for it is stricter than a general XML
-   parser. Build without it to rule it out:
-   `pnpm --filter @web2ai/cep-extension build -- --no-debug-file`
+5. **An XML comment before `<ExtensionManifest>`.** CEP's manifest reader is
+   stricter than a general XML parser. Comments inside the root element are
+   fine; one before it is not. Same for `.debug`.
+
+`docs/ARCHITECTURE.md` has the full table of these constraints and what each
+one costs.
 
 Illustrator only scans at startup, so quit it completely between attempts.
 

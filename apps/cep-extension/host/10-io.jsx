@@ -69,7 +69,7 @@ web2ai.readJsonFile = function (path) {
 };
 
 /**
- * Absolute path of the folder this host script lives in (dist/host).
+ * Absolute path of the folder this host script lives in (dist/jsx).
  * $.fileName is the currently executing script.
  *
  * @returns {string}

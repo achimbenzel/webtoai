@@ -1,69 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-  web2ai CEP panel manifest.
-
-  CEP 11 targets Illustrator CC 2021 (25.0) and newer. UXP is *not* publicly
-  available for Illustrator, so this extension deliberately uses the CEP 11 +
-  ExtendScript stack; see docs/ARCHITECTURE.md.
-
-  The two CEFCommandLine parameters are load-bearing:
-    --enable-nodejs   turns on the Node.js runtime inside the panel, which the
-                      transport server in node/ needs.
-    --mixed-context   runs Node and the browser context in one JS context so
-                      the panel UI can call require() directly.
--->
-<ExtensionManifest
-  Version="11.0"
-  ExtensionBundleId="com.web2ai.cep"
-  ExtensionBundleVersion="0.1.0"
-  ExtensionBundleName="web2ai"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ExtensionManifest Version="11.0" ExtensionBundleId="com.web2ai.cep"
+    ExtensionBundleVersion="1.0.0" ExtensionBundleName="web2ai"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.web2ai.cep.panel" Version="0.1.0" />
+    <Extension Id="com.web2ai.cep.panel" Version="1.0.0"/>
   </ExtensionList>
-
   <ExecutionEnvironment>
     <HostList>
-      <!-- ILST = Illustrator. 25.0 is CC 2021, the first release on CEP 11. -->
-      <Host Name="ILST" Version="[25.0,99.9]" />
+      <!-- ILST = Illustrator; 25.0 = CC 2021, open-ended upper bound -->
+      <Host Name="ILST" Version="[25.0,99.9]"/>
     </HostList>
     <LocaleList>
-      <Locale Code="All" />
+      <Locale Code="All"/>
     </LocaleList>
     <RequiredRuntimeList>
-      <!--
-        This is a *minimum*, not a target. Declaring 11.0 is the single most
-        common reason an otherwise correct panel never appears: CEP checks it
-        before it looks at anything else, and a host that reports a lower CSXS
-        revision than the number here is dropped without a word. Extensions
-        that load on Illustrator 2021-2026 in practice all declare 9.0.
-
-        The CEP 11 requirement is still enforced — by the <Host> range above,
-        which admits Illustrator 25.0 (CC 2021) and newer, the releases that
-        ship CEP 11. Lowering this line widens nothing in practice.
-      -->
-      <RequiredRuntime Name="CSXS" Version="9.0" />
+      <!-- A minimum, not a target. CEP checks it before anything else. -->
+      <RequiredRuntime Name="CSXS" Version="9.0"/>
     </RequiredRuntimeList>
   </ExecutionEnvironment>
-
   <DispatchInfoList>
     <Extension Id="com.web2ai.cep.panel">
       <DispatchInfo>
         <Resources>
-          <MainPath>./client/index.html</MainPath>
-          <ScriptPath>./host/index.jsx</ScriptPath>
-          <!--
-            Only the two parameters the architecture actually needs.
-            --allow-file-access and --allow-file-access-from-files were removed
-            from Chromium; passing a switch the embedded CEF no longer knows is
-            a risk with no upside, since the panel loads its own files from its
-            own directory either way.
-          -->
-          <CEFCommandLine>
-            <Parameter>--enable-nodejs</Parameter>
-            <Parameter>--mixed-context</Parameter>
-          </CEFCommandLine>
+          <MainPath>./index.html</MainPath>
+          <!-- host.jsx is auto-loaded into the ExtendScript engine -->
+          <ScriptPath>./jsx/host.jsx</ScriptPath>
+          <!-- build --enable-node fills this in; see docs/ARCHITECTURE.md -->
+          <CEFCommandLine/>
         </Resources>
         <Lifecycle>
           <AutoVisible>true</AutoVisible>
@@ -80,6 +43,10 @@
               <Height>320</Height>
               <Width>300</Width>
             </MinSize>
+            <MaxSize>
+              <Height>1400</Height>
+              <Width>520</Width>
+            </MaxSize>
           </Geometry>
         </UI>
       </DispatchInfo>

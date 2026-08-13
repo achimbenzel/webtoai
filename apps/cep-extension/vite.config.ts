@@ -1,10 +1,5 @@
 import { defineConfig, type Plugin } from "vite";
 import { fileURLToPath } from "node:url";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
-const here = fileURLToPath(new URL(".", import.meta.url));
-const pkg = JSON.parse(readFileSync(join(here, "package.json"), "utf8")) as { version: string };
 
 /**
  * CEP panels are loaded from a `file://` URL. Chromium refuses to fetch ES
@@ -34,11 +29,17 @@ export default defineConfig({
   base: "./",
   plugins: [classicScriptTags()],
   define: {
-    __WEB2AI_VERSION__: JSON.stringify(pkg.version),
+    // Kept in step with CSXS/manifest.xml's ExtensionBundleVersion, which CEP
+    // reads and which deliberately does not track the npm package version.
+    __WEB2AI_VERSION__: JSON.stringify("1.0.0"),
   },
   build: {
-    outDir: fileURLToPath(new URL("./dist/client", import.meta.url)),
-    emptyOutDir: true,
+    // The panel lands at the extension root, mirroring the layout of Illustrator
+    // panels that are known to load: index.html at the top, js/ and css/ beside
+    // it. The other build steps write into the same folder afterwards, so this
+    // build must not empty it.
+    outDir: fileURLToPath(new URL("./dist", import.meta.url)),
+    emptyOutDir: false,
     // CEP 11 ships CEF 88.
     target: "chrome88",
     modulePreload: false,
@@ -48,8 +49,9 @@ export default defineConfig({
       output: {
         format: "iife",
         inlineDynamicImports: true,
-        entryFileNames: "assets/panel.js",
-        assetFileNames: "assets/[name][extname]",
+        entryFileNames: "js/panel.js",
+        assetFileNames: (asset) =>
+          asset.names?.[0]?.endsWith(".css") === true ? "css/style.css" : "assets/[name][extname]",
       },
     },
   },

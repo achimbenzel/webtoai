@@ -467,9 +467,16 @@ function checkDebugMode() {
 function checkHostBundle() {
   heading("ExtendScript host bundle");
 
-  const bundle = join(distDir, "host", "index.jsx");
+  // Follow the manifest rather than hardcoding a path, so the check cannot
+  // drift when the extension layout changes.
+  const scriptPath = readManifest(distDir).scriptPath;
+  if (scriptPath === undefined) {
+    line("fail", "the manifest declares no <ScriptPath>");
+    return;
+  }
+  const bundle = resolveManifestPath(distDir, scriptPath);
   if (!existsSync(bundle)) {
-    line("fail", "dist/host/index.jsx is missing");
+    line("fail", `${scriptPath} is missing`);
     return;
   }
 

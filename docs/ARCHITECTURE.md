@@ -39,9 +39,11 @@ Consequences that shape everything downstream:
   limits and break on any stray quote or U+2028. Instead the Node side writes
   the scene to a temp file and `evalScript` carries only the path; the host
   reads the file itself (`host/10-io.jsx`).
-- **Node must be switched on in the manifest.** `CSXS/manifest.xml` passes
-  `--enable-nodejs` and `--mixed-context` via `CEFCommandLine`. Without them
-  there is no `require` in the panel and no transport server.
+- **Node must be switched on in the manifest.** `--enable-nodejs` and
+  `--mixed-context` go into `CEFCommandLine`; without them there is no
+  `require` in the panel and no transport server. They are **opt-in at build
+  time** (`build -- --enable-node`) rather than baked into the checked-in
+  manifest — see "Getting CEP to load the panel" below for why.
 
 ## Coordinate system and units
 
@@ -141,14 +143,15 @@ TypeScript, so the build copies `config/` into the extension root and
 
 ```
 apps/cep-extension/dist/
-├── .debug              generated; enables remote debugging on the configured port
 ├── CSXS/manifest.xml
-├── client/             Vite build of the panel (single classic IIFE — see below)
-├── config/             copy of the repo-root config/
-└── host/index.jsx      json2.js + host/*.jsx concatenated in filename order
+├── index.html          Vite build of the panel (single classic IIFE — see below)
+├── js/panel.js
+├── css/style.css
+├── jsx/host.jsx        json2.js + host/*.jsx concatenated in filename order
+└── config/             copy of the repo-root config/
 ```
 
-Two non-obvious details:
+Three non-obvious details:
 
 - The panel is built as a **classic IIFE script with `defer`**, not an ES
   module. CEP loads the panel from a `file://` URL and Chromium refuses to
@@ -157,10 +160,33 @@ Two non-obvious details:
 - The host bundle is **concatenated, not `#include`d**. ExtendScript's
   preprocessor would work, but concatenation means the shipped file is exactly
   the linted file and nothing resolves paths at runtime.
+- The layout — `index.html` at the extension root with `js/` and `css/` beside
+  it — deliberately mirrors Illustrator panels that are known to load, rather
+  than a tidier `client/` subfolder. The next section explains why that is
+  worth caring about.
 
-`scripts/dev-install.mjs` symlinks `dist/` into the per-user CEP extensions
-directory and sets `PlayerDebugMode`. It is one cross-platform script rather
-than a `.sh`/`.ps1` pair so the platforms cannot drift.
+`scripts/dev-install.mjs` links or copies `dist/` into the per-user CEP
+extensions directory and sets `PlayerDebugMode`. It is one cross-platform
+script rather than a `.sh`/`.ps1` pair so the platforms cannot drift.
+
+## Getting CEP to load the panel
+
+CEP is silent when it rejects an extension. There is no error, no log entry and
+no menu item — the panel simply is not there. Every constraint below was paid
+for once and is written down so it is not paid for twice:
+
+| Constraint                                  | Why                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No XML comment before `<ExtensionManifest>` | CEP's manifest reader is stricter than a general XML parser. The same applies to `.debug`. Comments _inside_ the root element are fine.                                                                                                                                                       |
+| `RequiredRuntime` is `9.0`                  | It is a **minimum**, checked before anything else. Declaring the CEP version we target (11.0) means any host reporting a lower CSXS revision drops us silently. The Illustrator requirement is carried by `<Host Version="[25.0,99.9]">`, which is the field that actually enforces CC 2021+. |
+| `CEFCommandLine` is empty by default        | Panels that load in the wild generally pass nothing here. `--enable-nodejs` and `--mixed-context` are added by `build -- --enable-node` when the transport server needs them, so the switches can be ruled in or out in one rebuild.                                                          |
+| No `.debug` by default                      | Same reasoning; `build -- --debug-file` adds it.                                                                                                                                                                                                                                              |
+| `MainPath`/`ScriptPath` must resolve        | A build that failed partway leaves a folder that looks perfectly normal and is silently ignored. `dev:install` refuses to install one.                                                                                                                                                        |
+| Windows: install a copy, not a link         | CEP's scanner does not reliably follow reparse points. `dev:install --copy`.                                                                                                                                                                                                                  |
+
+`pnpm dev:doctor` checks all of these, and `--reference <folder>` diffs our
+manifest field by field against any extension that Illustrator does list —
+which is the fastest way to find whichever one is biting today.
 
 ## Testing strategy
 

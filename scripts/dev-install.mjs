@@ -210,7 +210,11 @@ function install() {
   log("Done. Next steps:");
   log("  1. Quit Adobe Illustrator completely — it only scans extensions at startup.");
   log("  2. Open Window > Extensions > web2ai.");
-  log(`  3. Remote debugging: http://localhost:${debugPort()} while the panel is open.`);
+  if (existsSync(join(target, ".debug"))) {
+    log(`  3. Remote debugging: http://localhost:${debugPort()} while the panel is open.`);
+  } else {
+    log("  3. Remote debugging is off; rebuild with --debug-file to enable it.");
+  }
   log("");
   log("Panel missing from the menu? Run: pnpm dev:doctor");
 }
